@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>后宫风云录 · 完整版</title>
+  <script>
+// ======================= AI 配置（DeepSeek） =======================
+const AI_CONFIG = {
+    apiKey: "sk-f0b7f2a456ed48fa976e3b4e4b236746",  // 填入你的 DeepSeek API Key
+    apiUrl: "https://api.deepseek.com/v1/chat/completions",
+    model: "deepseek-chat",  // 或 "deepseek-reasoner"
+    enabled: true  // 改为 true 启用 AI 对话
+};
+</script>
+    <style>
+* { box-sizing: border-box; }
+body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: #2c1a12;
+    margin: 0;
+    padding: 12px;
+    color: #2c1a12;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.top-bar {
+    background: #fffaf2;
+    border-radius: 28px;
+    padding: 10px 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 1px solid #e9cfb2;
+    flex-shrink: 0;
+}
+.main-content {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+    min-height: 0;
+}
+.left-panel {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    min-width: 0;
+}
+.right-panel {
+    flex: 0.8;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+    height: 100%;
+}
+.card {
+    background: #fffaf2;
+    border-radius: 24px;
+    padding: 12px;
+    border: 1px solid #e9cfb2;
+    display: flex;
+    flex-direction: column;
+}
+.section-title {
+    font-size: 1rem;
+    font-weight: bold;
+    background: #e7d9cc;
+    padding: 6px 10px;
+    border-radius: 30px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.collapsible-content { overflow-y: auto; max-height: 65vh; }
+.collapsed { display: none; }
+.empire-bar {
+    display: flex;
+    justify-content: space-between;
+    background: #e7d9cc;
+    padding: 6px 12px;
+    border-radius: 40px;
+    font-weight: 500;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.7rem;
+    margin-bottom: 8px;
+}
+.stats {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.stats span {
+    background: white;
+    padding: 3px 8px;
+    border-radius: 30px;
+    font-size: 0.7rem;
+}
+.concubine-card, .child-card, .deceased-card {
+    background: #fef6ea;
+    border-radius: 16px;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    border: 1px solid #edd6b5;
+}
+.child-card { background: #fff6ed; border-left: 4px solid #e6b17e; }
+.concubine-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
+}
+.concubine-name {
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #8b3c1c;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    text-decoration: underline;
+}
+.attr-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 5px 0;
+    font-size: 0.6rem;
+}
+.attr {
+    background: #f4e5d4;
+    padding: 1px 6px;
+    border-radius: 14px;
+}
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+}
+.btn {
+    background: #bc8b5c;
+    border: none;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 25px;
+    font-size: 0.6rem;
+    cursor: pointer;
+}
+.btn:active { transform: scale(0.96); background: #9b6e48; }
+.month-btn {
+    background: #c49a6c;
+    font-size: 0.85rem;
+    font-weight: bold;
+    padding: 8px;
+    width: 100%;
+}
+.log-box {
+    background: #2a221c;
+    color: #f1e5d8;
+    border-radius: 20px;
+    padding: 8px;
+    flex: 1;
+    overflow-y: auto;
+    font-size: 0.65rem;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.log-entry {
+    border-left: 2px solid #e6b17e;
+    padding-left: 6px;
+    margin: 4px 0;
+}
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.modal-content {
+    background: #fff7ed;
+    max-width: 500px;
+    width: 90%;
+    max-height: 85%;
+    border-radius: 28px;
+    padding: 16px;
+    overflow-y: auto;
+}
+.close-modal { float: right; font-size: 22px; cursor: pointer; }
+.timeline-item {
+    border-left: 2px solid #bc8b5c;
+    padding-left: 8px;
+    margin: 8px 0;
+    font-size: 0.7rem;
+}
+.text-gold { color: #c9a03d; font-weight: bold; }
+.text-red { color: #b33; }
+.status-badge { background: #8b3c1c; color: white; padding: 1px 6px; border-radius: 14px; font-size: 0.55rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 顶部状态栏 -->
+    <div class="top-bar">
+        <h1>🏯 后宫风云录 · 天机版</h1>
+        <div class="empire-bar">
+            <span>📅 <span id="year">1</span>年 <span id="month">1</span>月</span>
+            <span>⚖️ 纷争指数 <span id="chaos">0</span></span>
+            <span>👩‍👧‍👦 妃嫔 <span id="concubineCount">0</span></span>
+            <button id="addRandomBtn" class="btn" style="background:#8b6b4a;">🌸 选秀</button>
+            <button id="setQueenBtn" class="btn" style="background:#b45f2b;">👑 册后</button>
+            <button id="nextMonthBtn" class="btn month-btn" style="width:auto;">⏩ 过一月</button>
+        </div>
+        <div class="stats">
+            <span>👶 皇子: <span id="princeCount">0</span></span>
+            <span>👸 公主: <span id="princessCount">0</span></span>
+        </div>
+    </div>
+
+    <!-- 左右分栏主体 -->
+    <div class="main-content">
+        <!-- 左侧：妃嫔/皇嗣/往生录 -->
+        <div class="left-panel">
+            <!-- 妃嫔名册 -->
+            <div class="card">
+                <div class="section-title" id="toggleConcubines">
+                    <span>🌸 妃嫔名册</span>
+                    <span class="collapse-icon">▼</span>
+                </div>
+                <div id="concubinesList" class="collapsible-content"></div>
+            </div>
+
+            <!-- 皇嗣录 -->
+            <div class="card">
+                <div class="section-title" id="toggleChildren">
+                    <span>👶 皇嗣录</span>
+                    <span class="collapse-icon">▼</span>
+                </div>
+                <div id="childrenList" class="collapsible-content"></div>
+            </div>
+
+            <!-- 往生录（默认折叠） -->
+            <div class="card">
+                <div class="section-title" id="toggleDeceased">
+                    <span>📜 往生录</span>
+                    <span class="collapse-icon">▶</span>
+                </div>
+                <div id="deceasedList" class="collapsible-content" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- 右侧：起居注（日志） -->
+        <div class="right-panel">
+            <div class="card" style="flex:1; display:flex; flex-direction:column; min-height:0; height:100%;">
+                <h2 style="font-size:1rem; margin:0 0 8px 0;">📜 起居注</h2>
+                <div id="storyLog" class="log-box"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 弹窗 -->
+<div id="renameModal" class="modal"><div class="modal-content"><span class="close-modal" id="closeRenameModal">&times;</span><h3>✏️ 修改姓名</h3><input type="text" id="newNameInput" class="name-input"><button id="confirmRenameBtn" class="btn" style="background:#6b8c5c; width:100%;">确认修改</button></div></div>
+<div id="draftModal" class="modal"><div class="modal-content"><span class="close-modal" id="closeDraftModal">&times;</span><h3>🌸 选秀入宫</h3><div class="draft-preview" id="draftPreview">---</div><input type="text" id="draftNameInput" class="name-input" placeholder="或直接输入姓名"><div class="flex-btns"><button id="randomDraftBtn" class="btn" style="flex:1">🎲 重新随机</button><button id="confirmDraftBtn" class="btn" style="background:#6b8c5c; flex:1">✅ 确认入宫</button></div></div></div>
+<div id="timelineModal" class="modal"><div class="modal-content"><span class="close-modal" id="closeTimelineModal">&times;</span><h3 id="modalName">妃子履历</h3><div id="modalTimeline" style="max-height:400px; overflow-y:auto;"></div></div></div>
+<div id="selectQueenModal" class="modal"><div class="modal-content"><span class="close-modal" id="closeQueenModal">&times;</span><h3>👑 册立新皇后</h3><div id="queenCandidatesList"></div><p style="font-size:0.7rem;">* 只有妃位及以上才能册后</p></div></div>
+
+<script>
+// ======================= 位份体系 =======================
+const RANKS = ["皇后","皇贵妃","夫人","贵妃","妃","昭仪","贵嫔","婕妤","容华","婉仪","嫔","小仪","贵人","美人","常在","答应"];
+const RANK_INDEX = Object.fromEntries(RANKS.map((r,i)=>[r,i]));
+function getRankIndex(r){ return RANK_INDEX[r]??15; }
+function getRankByIndex(i){ return RANKS[Math.min(i,RANKS.length-1)]; }
+
+// 姓名字库
+const SURNAMES = ["燕","姜","秦","殷","虞","夏","萧","陆","薛","傅","李","楚","蒋","齐","杨","司","宗","阮","陶","黎","江","孙","谢","苏","南","郑","霍","叶","刑","何","白","洛","梁","贺","尹","许","曹","吴","徐","乔","沈","左","柳","元","刘","纪","项","明","宁","季","盛","裴","云","言","涂","韩","莫","魏","温","韦","年","安","段","晏","崔","周","贾","宣","赫连","澹台","夏侯","闻人","百里","皇甫","上官","南宫","东方","西门","涂山","纳兰","司徒","司鸿","司空","瑾生","太","姒","姬","嬴","羲","泠","巫","神","海","玄","翡"];
+const GIVEN_NAMES = ["梦","天","君","爱","昭","华","若","欢","妙","玉","月","蕖","珑","窈","旖","漪","鸢","鸾","鹤","黛","雪","歌","诗","清","惠","雨","春","曦","兮","夕","柔","儿","京","夏","薇","锦","姝","棠","璃","仪","媛","如","菀","榆","禹","依","真","迎","珏","瑛","卿","柳","白","语","兰","蓁","舟","竹","香","妤","巧","莲","迢","冰","嫣","珞","宜","笙","舒","书","琼","琋","瑶","葵","荔","潇","漓","曜","明","熙","姒","元","霁","栖","衔","追","逢","妙","予","尔","于","与","之","和","子","真","若","少","亦","时","青","执","昭","则","吟","映","泊","远","宁","相","洛","初","怀","言","玉","永","白","羽","行","思","树","启","知","雍","容","惜","毓","可","光","寻","尚","令","允","荣","世","颂","云","惟","沐","清","瑜","珏","归","修","连","无","南","落"];
+function randomName(){ return SURNAMES[Math.floor(Math.random()*SURNAMES.length)] + GIVEN_NAMES[Math.floor(Math.random()*GIVEN_NAMES.length)] + GIVEN_NAMES[Math.floor(Math.random()*GIVEN_NAMES.length)]; }
+
+// 全局变量
+let concubines = [], children = [], deceasedConcubines = [], deceasedChildren = [];
+let nextConcubineId = 1, nextChildId = 1;
+let year = 1, month = 1, globalStory = [], globalPrinceCount = 0, globalPrincessCount = 0;
+let selectedConcubineId = null;
+
+function addStory(msg, relatedIds=[]){
+    let fullMsg = `📅 ${year}年${month}月 · ${msg}`;
+    // 新日志插入到数组开头（索引0），实现倒序
+    globalStory.push(fullMsg);
+    if(globalStory.length > 200) globalStory.shift(); // ✅ 删掉最旧的（头部），而不是最新的（尾部）
+    
+    if(relatedIds.length===0){
+        for(let f of concubines) if(msg.includes(f.name)) f.timeline.unshift({year,month,event:msg});
+        for(let c of children) if(msg.includes(c.name)) c.timeline.unshift({year,month,event:msg});
+    } else {
+        relatedIds.forEach(id=>{
+            let f = concubines.find(c=>c.id===id);
+            if(f) f.timeline.unshift({year,month,event:msg});
+            let ch = children.find(c=>c.id===id);
+            if(ch) ch.timeline.unshift({year,month,event:msg});
+        });
+    }
+    renderLog();
+// 在 addStory 末尾
+let logDiv = document.getElementById('storyLog');
+if(logDiv) logDiv.scrollTop = 0;
+}
+function renderLog(){
+    let logDiv = document.getElementById('storyLog');
+    if(logDiv) logDiv.innerHTML = globalStory.slice().reverse().map(m => `<div class="log-entry">${m}</div>`).join('');
+}
+function autoScrollLog(){
+    let logDiv = document.getElementById('storyLog');
+    if(logDiv) logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+// 随机属性
+const TRAITS_SET = [["善妒","霸道"],["端庄","贤惠"],["聪慧","隐忍"],["敏感","多疑"],["活泼","天真"],["野心","果断"],["阴险","毒辣"],["温婉","知礼"],["刚烈","直率"]];
+function randomTraits(){ return [...TRAITS_SET[Math.floor(Math.random()*TRAITS_SET.length)]]; }
+function generateRandomConcubine(sameSurname=null, relationFromId=null, kinshipType=""){
+    let name = sameSurname ? sameSurname + randomName().slice(sameSurname.length) : randomName();
+    let traits = randomTraits();
+    let favor = 35+Math.floor(Math.random()*45);
+    let cunning = 40+Math.floor(Math.random()*50);
+    let charm = 50+Math.floor(Math.random()*40);
+    let health = 60+Math.floor(Math.random()*35);
+    let ambition = 20+Math.floor(Math.random()*70);
+    let rank = "答应";
+    if(favor>72) rank="贵人"; if(favor>86) rank="嫔"; if(favor>93) rank="妃";
+    let secrets = Math.random()>0.8 ? ["巫蛊之术","与太医私通","偷窃贡品","私放高利贷"] : [];
+    let relatives = relationFromId ? [{id:relationFromId, type:kinshipType}] : [];
+    return { name, traits, favor, cunning, charm, health, ambition, rank, secrets, relatives, relationships:{}, childrenIds:[], pregnancy:null, isAlive:true, status:"active", statusEndYear:0, statusEndMonth:0, timeline:[], lastPromoteYear:0, lastRecommendYear:-99, deathInfo:null };
+}
+
+// 死亡处理
+async function killCharacter(obj, isConcubine, cause){
+    obj.isAlive = false;
+    obj.deathInfo = { year, age: isConcubine ? (year - obj.birthYear || year) : (year - obj.birthYear), cause };
+    if(isConcubine){
+        deceasedConcubines.push(obj);
+        concubines = concubines.filter(c=>c.id!==obj.id);
+    } else {
+        deceasedChildren.push(obj);
+        children = children.filter(c=>c.id!==obj.id);
+        let mother = concubines.find(c=>c.id===obj.motherId);
+        if(mother) mother.childrenIds = mother.childrenIds.filter(id=>id!==obj.id);
+    }
+      // 如果是妃子死亡，生成临终回顾
+    if(AI_CONFIG.enabled && AI_CONFIG.apiKey && isConcubine){
+        await generateDeathReview(obj);
+    }
+    addStory(`⚰️ ${obj.name} ${cause}。`, [obj.id]);
+}
+
+// 圣宠区间加值
+function getFavorGain(currentFavor){
+    if(currentFavor<=30) return 4+Math.floor(Math.random()*5);
+    if(currentFavor<=60) return 3+Math.floor(Math.random()*4);
+    if(currentFavor<=80) return 2+Math.floor(Math.random()*3);
+    return 1+Math.floor(Math.random()*3);
+}
+// 圣宠自然衰减
+function decayFavor(f){
+    if(!f.isAlive) return;
+    let decay = 0+Math.floor(Math.random()*3);
+    if(f.status==="cold_palace") decay = 3+Math.floor(Math.random()*3);
+    else if(f.status==="confined") decay = 1+Math.floor(Math.random()*3);
+    f.favor = Math.max(0, f.favor - decay);
+}
+// 成功率公式
+function successRate(attacker, defender, base=0.3){
+    let rate = base + (attacker.cunning - defender.cunning)/200 + attacker.ambition/200;
+    return Math.min(0.85, Math.max(0.15, rate));
+}
+
+// 状态检查
+function isActive(f){ return f.isAlive && f.status === "active"; }
+function setStatus(f, newStatus, months=0){
+    if(!f.isAlive) return;
+    let oldStatus = f.status;
+    f.status = newStatus;
+    if(months>0){
+        f.statusEndYear = year;
+        f.statusEndMonth = month + months;
+        while(f.statusEndMonth > 12){ f.statusEndMonth -= 12; f.statusEndYear++; }
+    } else { f.statusEndYear = 0; f.statusEndMonth = 0; }
+    if(newStatus === "confined") addStory(`🔒 ${f.name} 被禁足${months}个月。`, [f.id]);
+    else if(newStatus === "cold_palace") addStory(`❄️ ${f.name} 被打入冷宫！`, [f.id]);
+    else if(newStatus === "active" && oldStatus !== "active") addStory(`🔓 ${f.name} 恢复自由身。`, [f.id]);
+}
+function checkStatusExpiry(){
+    for(let f of concubines){
+        if(!f.isAlive) continue;
+        if((f.status==="confined" || f.status==="cold_palace") && f.statusEndYear>0){
+            if(year > f.statusEndYear || (year === f.statusEndYear && month >= f.statusEndMonth)) setStatus(f, "active");
+        }
+        if(f.status === "cold_palace" && f.isAlive){
+            let dmg = 2+Math.floor(Math.random()*4);
+            f.health -= dmg;
+            if(Math.random()<0.1) addStory(`🏚️ ${f.name} 在冷宫身体每况愈下，健康-${dmg}。`, [f.id]);
+            if(f.health <= 0) killCharacter(f, true, "冷宫病逝");
+        }
+    }
+}
+
+// 晋升/降级
+function canPromote(f){ return (year - f.lastPromoteYear) >= 1; }
+function tryPromote(f){
+    if(!isActive(f)) return false;
+    let idx = getRankIndex(f.rank);
+    if(idx===0) return false;
+    if(!canPromote(f)) return false;
+    let canUp = (f.favor>=80 && idx>=8) || (f.favor>=90 && idx>=5) || (f.favor>=95 && idx>=1);
+    if(!canUp) return false;
+    let newRank = getRankByIndex(idx-1);
+    if((newRank==="皇后" && concubines.some(c=>c.rank==="皇后" && c.id!==f.id)) ||
+       (newRank==="皇贵妃" && concubines.some(c=>c.rank==="皇贵妃" && c.id!==f.id))) return false;
+    let oldRank=f.rank;
+    f.rank=newRank;
+    f.lastPromoteYear=year;
+    addStory(`📜 ${f.name} 位份由 ${oldRank} 升至 ${newRank}！`, [f.id]);
+    return true;
+}
+function demote(f, reason=""){
+    if(!f.isAlive) return;
+    let idx=getRankIndex(f.rank);
+    if(idx>=RANKS.length-1) return;
+    let newRank=getRankByIndex(idx+1);
+    let oldRank=f.rank;
+    f.rank=newRank;
+    addStory(`⚠️ ${f.name} ${reason? reason+"，":""}降为 ${newRank}。`, [f.id]);
+}
+
+// 怀孕系统
+function startPregnancy(f){
+    // 产后6个月内不能怀孕
+    if(f.lastBirthYear !== undefined && (year - f.lastBirthYear) < 1) return;
+    if(!isActive(f) || f.pregnancy) return;
+    let dueYear=year, dueMonth=month+9;
+    while(dueMonth>12){ dueMonth-=12; dueYear++; }
+    f.pregnancy={ dueYear, dueMonth, weeks:0 };
+    addStory(`🤰 ${f.name} 怀上龙裔！预产期 ${dueYear}年${dueMonth}月。`, [f.id]);
+}
+function updatePregnancies(){
+    for(let f of concubines){
+        if(!f.isAlive || !f.pregnancy) continue;
+        if(f.pregnancy.dueYear===year && f.pregnancy.dueMonth===month){
+            let isPrince = Math.random()>0.48;
+            let order = 0;
+            if(isPrince){ globalPrinceCount++; order=globalPrinceCount; }
+            else { globalPrincessCount++; order=globalPrincessCount; }
+            let childName = `${isPrince?"皇":""}${order}${isPrince?"皇子":"公主"}`;
+            let healthVal = 50+Math.floor(Math.random()*45);
+            let talent = Math.floor(Math.random()*10);
+            let favorChild = 40+Math.floor(Math.random()*40);
+            let newChild = { id:nextChildId++, name:childName, motherId:f.id, gender:isPrince?"皇子":"公主", order, birthYear:year, birthMonth:month, health:healthVal, talent, favor:favorChild, title:"", isAlive:true, isCrownPrince:false, age:0, timeline:[], deathInfo:null };
+            children.push(newChild);
+            f.childrenIds.push(newChild.id);
+            addStory(`👶 ${f.name} 诞下${childName}！天赋${talent}`, [f.id, newChild.id]);
+            f.health = Math.max(0, f.health-5+Math.floor(Math.random()*10));
+            f.pregnancy=null;
+            if(Math.random()<0.2){ f.health-=12; addStory(`🩸 ${f.name} 产后血崩，身体大损。`, [f.id]); if(f.health<=0) killCharacter(f, true, "产后血崩"); }
+        }
+    }
+}
+function updatePregnancyWeeks(){
+    for(let f of concubines){
+        if(!f.isAlive || !f.pregnancy) continue;
+        if(!isActive(f)){
+            addStory(`💔 ${f.name} 因禁足/冷宫，龙胎未保住。`, [f.id]);
+            f.pregnancy=null;
+            continue;
+        }
+        f.pregnancy.weeks++;
+        let miscChance = f.pregnancy.weeks<=3?0.12 : (f.pregnancy.weeks<=6?0.06 : (f.pregnancy.weeks<=8?0.03:0.01));
+        if(Math.random()<miscChance){
+            addStory(`💔 不幸，${f.name} 怀孕 ${f.pregnancy.weeks} 月时小产。`, [f.id]);
+            f.health = Math.max(0, f.health-18);
+            f.pregnancy=null;
+        }
+    }
+}
+
+// AI行动
+function aiMonthly(){
+    for(let f of concubines.filter(c=>isActive(c))){
+        if(Math.random()<0.4 && (f.favor<65 || f.traits.includes("善妒"))){
+            let success = Math.random()<(f.charm/100);
+            if(success){ let gain=2+Math.floor(Math.random()*4); f.favor=Math.min(100,f.favor+gain); addStory(`✨ ${f.name} 争宠献艺，圣宠+${gain}。`, [f.id]);}
+            else addStory(`😞 ${f.name} 争宠失败。`, [f.id]);
+        }
+        else if(f.cunning>70 && (f.traits.includes("霸道")||f.traits.includes("阴险")) && Math.random()<0.35){
+            let enemies = concubines.filter(c=>isActive(c) && c.id!==f.id && (f.relationships[c.id]<-10 || c.favor>f.favor+10));
+            if(enemies.length){
+                let target = enemies[Math.floor(Math.random()*enemies.length)];
+                if(Math.random()<f.cunning/(target.cunning+55)){
+                    let hurt = 3+Math.floor(Math.random()*8); target.favor=Math.max(0,target.favor-hurt);
+                    f.relationships[target.id]=(f.relationships[target.id]||0)-5;
+                    addStory(`🗡️ ${f.name} 陷害 ${target.name}，圣宠-${hurt}。`, [f.id,target.id]);
+                } else { f.favor=Math.max(0,f.favor-6); addStory(`💢 ${f.name} 陷害败露，圣宠-6。`, [f.id]);}
+            }
+        }
+        else if(Math.random()<0.12 && !f.traits.includes("善妒")){
+            let friend = concubines.filter(c=>isActive(c) && c.id!==f.id && (f.relationships[c.id]||0)<25)[0];
+            if(friend){ f.relationships[friend.id]=(f.relationships[friend.id]||0)+8; addStory(`🌺 ${f.name} 与 ${friend.name} 结为姐妹。`, [f.id,friend.id]);}
+        }
+        // AI下毒
+        if(Math.random()<0.04 && f.cunning>65){
+            let enemies = concubines.filter(c=>isActive(c) && c.id!==f.id && (f.relationships[c.id]<-15));
+            if(enemies.length){
+                let target = enemies[Math.floor(Math.random()*enemies.length)];
+                let rate = successRate(f, target, 0.25);
+                if(Math.random()<rate){
+                    let dmg = 8+Math.floor(Math.random()*18);
+                    target.health -= dmg;
+                    addStory(`☠️ ${f.name} 暗中对 ${target.name} 下毒，健康-${dmg}！`, [f.id, target.id]);
+                    if(target.health<=0) killCharacter(target, true, "毒发身亡");
+                } else {
+                    f.favor = Math.max(0, f.favor-8);
+                    addStory(`🕵️ ${f.name} 下毒败露，圣宠-8。`, [f.id]);
+                    if(Math.random()<0.2) setStatus(f, "confined", 6);
+                }
+            }
+        }
+        // AI造谣
+        if(Math.random()<0.1){
+            let targets = concubines.filter(c=>isActive(c) && c.id!==f.id && (f.relationships[c.id]<-5 || c.favor>f.favor+15));
+            if(targets.length){
+                let target = targets[Math.floor(Math.random()*targets.length)];
+                let rate = successRate(f, target, 0.3);
+                if(Math.random()<rate){
+                    let loss = 3+Math.floor(Math.random()*8);
+                    target.favor = Math.max(0, target.favor-loss);
+                    addStory(`🗣️ ${f.name} 散布谣言中伤 ${target.name}，圣宠-${loss}。`, [f.id, target.id]);
+                } else {
+                    f.favor = Math.max(0, f.favor-6);
+                    addStory(`💬 ${f.name} 造谣失败，圣宠-6。`, [f.id]);
+                }
+            }
+        }
+        // 举荐姐妹
+        if(f.ambition >= 80 && concubines.length < 20 && getRankIndex(f.rank) <= getRankIndex("嫔") && (f.lastRecommendYear === undefined || year - f.lastRecommendYear >= 18)) {
+            if(Math.random() < 0.05){
+                let newName = f.name.charAt(0) + randomName().slice(1);
+                let newF = generateRandomConcubine(f.name.charAt(0), f.id, "嫡妹");
+                newF.name = newName;
+                newF.relationships = {};
+                for(let ex of concubines) newF.relationships[ex.id] = Math.floor(Math.random()*60)-30;
+                newF.relationships[f.id] = 40 + Math.floor(Math.random()*20);
+                newF.id = nextConcubineId++;
+                concubines.push(newF);
+                f.lastRecommendYear = year;
+                addStory(`🌸 ${f.name} 向皇上举荐妹妹「${newF.name}」入宫，封为 ${newF.rank}。`, [f.id, newF.id]);
+            }
+        }
+    }
+    // 自然怀孕
+    for(let f of concubines){ if(!f.pregnancy && isActive(f) && Math.random()<0.04 && f.favor>45) startPregnancy(f); }
+}
+
+function updateChildren(){
+    for(let ch of children){
+        if(!ch.isAlive) continue;
+        ch.age = year - ch.birthYear;
+        let mother = concubines.find(c=>c.id===ch.motherId);
+        if(ch.age>=10 && Math.random()<0.08 && mother && isActive(mother)){
+            if(Math.random()<0.5){
+                addStory(`👧 ${ch.name} 在父皇面前为母妃 ${mother.name} 美言，圣宠+3。`, [mother.id, ch.id]);
+                mother.favor = Math.min(100, mother.favor+3);
+            } else {
+                addStory(`📖 ${ch.name} 勤奋读书，天赋可能提升。`, [ch.id]);
+                if(Math.random()<0.3) ch.talent = Math.min(9, ch.talent+1);
+            }
+        }
+        if(Math.random()<0.008){ ch.health-=8+Math.random()*12; addStory(`🩺 ${ch.name} 生了一场大病，健康-${Math.floor(8+Math.random()*12)}。`, [ch.id]); if(ch.health<=0) killCharacter(ch, false, "因病夭折"); }
+        if(Math.random()<0.005){ killCharacter(ch, false, "意外身亡"); }
+    }
+}
+
+// ======================= 对话模板库（160+条） =======================
+const DIALOGS = {
+    sajiao: [
+        "「皇上～臣妾新学了一支舞，只给陛下一看～」",
+        "「陛下，您都三天没来看臣妾了…臣妾好想您～」",
+        "「皇上～臣妾今日特意炖了汤，您尝尝嘛～」",
+        "「陛下～臣妾新得的胭脂，您闻闻香不香？」",
+        "「皇上，臣妾昨晚梦到您了，醒来就睡不着了…」",
+        "「陛下～臣妾想陪您去御花园走走嘛～」",
+        "「皇上，您看臣妾今日戴的这支簪子好看吗？」",
+        "「陛下～臣妾给您绣了个香囊，您看看喜不喜欢～」",
+        "「皇上，臣妾最近学了首新曲子，弹给您听好不好？」",
+        "「陛下～您上次答应陪臣妾赏花的，可别忘了哦～」",
+        "「皇上，臣妾觉得您今天格外英武呢～」",
+        "「陛下～臣妾想和您多说说话，您别走嘛～」"
+    ],
+    yaoliwu: [
+        "「皇上～臣妾想要那支翡翠步摇～」",
+        "「陛下，臣妾生辰快到了呢…」",
+        "「皇上～听说新进贡的波斯猫好可爱～」",
+        "「陛下，臣妾看中了那匹雪白的汗血宝马～」",
+        "「皇上～臣妾想要一盒上等的南海珍珠粉～」",
+        "「陛下，臣妾的琴旧了，想要一把新琴～」",
+        "「皇上～那幅前朝名画臣妾好喜欢～」"
+    ],
+    gao_zhuang: [
+        "「皇上，{target}姐姐背后说您偏心呢…」",
+        "「陛下，{target}娘娘偷偷收受贿赂…」",
+        "「皇上，{target}对太后不敬！」",
+        "「陛下，{target}私下议论朝政…」",
+        "「皇上，{target}克扣宫人月例银两…」",
+        "「陛下，{target}暗中拉拢大臣家眷…」"
+    ],
+    jujian: [
+        "「皇上，臣妾有个妹妹才貌双全，愿侍奉陛下～」",
+        "「陛下，臣妾族中有一嫡妹，想入宫陪伴臣妾…」",
+        "「皇上～臣妾想举荐自家妹妹入宫为伴～」",
+        "「陛下，臣妾的庶妹琴棋书画样样精通…」"
+    ],
+    pingjia_hao: [
+        "「{target}姐姐今天穿得真好看呢～」",
+        "「{target}真是贤惠，臣妾自愧不如～」",
+        "「{target}妹妹的琴艺越发精湛了～」",
+        "「{target}姐姐待人真温和，宫里人人都夸～」"
+    ],
+    pingjia_huai: [
+        "「哼，{target}装什么清高…」",
+        "「{target}行事太过分了，仗着圣宠目中无人…」",
+        "「听说{target}最近又发脾气了，真难伺候…」",
+        "「{target}那点才艺也敢拿出来献丑…」"
+    ],
+    chaos: [
+        "「{target}，你算什么东西！也配和我争？」",
+        "「{target}，你别太过分了！」",
+        "「{target}，你欺人太甚，我忍你很久了！」",
+        "「{target}，你以为圣上宠你就能无法无天了？」"
+    ],
+    wenhou: [
+        "「{target}姐姐今日气色真好，用什么脂粉？」",
+        "「{target}妹妹，咱们一起去御花园逛逛？」",
+        "「给{target}姐姐请安～」",
+        "「{target}姐姐最近辛苦了，要注意身体～」"
+    ],
+    baoyuan: [
+        "「哎，皇上好久没来看我了…」",
+        "「这宫里日子真是寂寞…」",
+        "「{target}凭什么那么受宠…」",
+        "「整日困在这四方天地，真是无趣…」"
+    ],
+    qiu_jinwei: [
+        "「皇上，臣妾入宫已有三年，还未晋位…」",
+        "「陛下，臣妾的孩子还没封号呢…」",
+        "「皇上～您答应过臣妾要升位份的～」"
+    ],
+    qiu_litaizi: [
+        "「皇上，{child}聪慧过人，臣妾斗胆进言…」",
+        "「陛下，国本不可动摇，大皇子仁厚…」"
+    ],
+    child_say: [
+        "「父皇～儿臣想要那匹小马驹～」",
+        "「父皇，母妃最近很不开心，您去看看她吧～」",
+        "「父皇，儿臣想读书习武，报效朝廷！」"
+    ]
+};
+
+function randomDialog(type, params){
+    let arr = DIALOGS[type] || DIALOGS.sajiao;
+    let text = arr[Math.floor(Math.random() * arr.length)];
+    for(let k in params) text = text.replace(`{${k}}`, params[k]);
+    return text;
+}
+
+// 每月随机触发对话（支持 AI）
+async function triggerRandomDialogue() {
+    if (!AI_CONFIG.enabled || !AI_CONFIG.apiKey) {
+        // 未启用 AI，使用模板对话
+        useTemplateDialogue();
+        return;
+    }
+    
+    // 每月至少1次，最多2次 AI 对话
+    let dialogueCount = 1 + Math.floor(Math.random() * 2);
+    for (let d = 0; d < dialogueCount; d++) {
+        let activeList = concubines.filter(c => isActive(c));
+        if (activeList.length === 0) return;
+        let speaker = activeList[Math.floor(Math.random() * activeList.length)];
+        
+        let dialogText = await generateAIDialogue(speaker);
+        
+        if (dialogText) {
+            addStory(`💬 ${speaker.name} 说：${dialogText}`, [speaker.id]);
+        } else {
+            // AI 失败，回退到模板
+            useSingleTemplateDialogue(speaker, activeList);
+        }
+        
+        // 避免 API 调用过快
+        await sleep(800);
+    }
+}
+
+// 模板对话（原有逻辑，作为备选）
+function useTemplateDialogue() {
+    let dialogueCount = 1 + Math.floor(Math.random() * 2);
+    for (let d = 0; d < dialogueCount; d++) {
+        let activeList = concubines.filter(c => isActive(c));
+        if (activeList.length === 0) return;
+        let speaker = activeList[Math.floor(Math.random() * activeList.length)];
+        useSingleTemplateDialogue(speaker, activeList);
+    }
+}
+
+function useSingleTemplateDialogue(speaker, activeList) {
+    let target = activeList.filter(c => c.id !== speaker.id)[Math.floor(Math.random() * activeList.filter(c => c.id !== speaker.id).length)];
+    let childHere = children.filter(c => c.motherId === speaker.id && c.isAlive)[0];
+    let r = Math.random();
+    let dialogText = "";
+    
+    if (r < 0.1 && speaker.ambition > 70 && concubines.length < 18) {
+        dialogText = randomDialog("jujian", {});
+    } else if (r < 0.2 && speaker.favor < 40) {
+        dialogText = randomDialog("baoyuan", {target: target ? target.name : ""});
+    } else if (r < 0.3 && speaker.favor > 75) {
+        dialogText = randomDialog("sajiao", {});
+    } else if (r < 0.38 && target && speaker.relationships[target.id] < -15) {
+        dialogText = randomDialog("gao_zhuang", {target: target.name});
+    } else if (r < 0.46 && target && speaker.relationships[target.id] < -25) {
+        dialogText = randomDialog("chaos", {target: target.name});
+    } else if (r < 0.54 && target && speaker.relationships[target.id] > 15) {
+        dialogText = randomDialog("wenhou", {target: target.name});
+    } else if (r < 0.62 && speaker.ambition > 75 && getRankIndex(speaker.rank) <= getRankIndex("妃")) {
+        dialogText = randomDialog("qiu_jinwei", {});
+    } else if (r < 0.7 && childHere && speaker.ambition > 70 && childHere.age >= 5) {
+        dialogText = randomDialog("qiu_litaizi", {child: childHere.name});
+    } else if (r < 0.76 && target) {
+        dialogText = randomDialog("pingjia_hao", {target: target.name});
+    } else if (r < 0.82 && target) {
+        dialogText = randomDialog("pingjia_huai", {target: target.name});
+    } else if (r < 0.88 && speaker.favor > 60) {
+        dialogText = randomDialog("yaoliwu", {});
+    } else {
+        dialogText = randomDialog("wenhou", {target: target ? target.name : "姐姐"});
+    }
+    
+    if (dialogText) addStory(`💬 ${speaker.name} 说：${dialogText}`, [speaker.id]);
+}
+
+// AI 生成对话（DeepSeek）
+async function generateAIDialogue(speaker) {
+    try {
+        // 获取最近5条日志作为上下文
+        const recentLogs = globalStory.slice(0, 5).join("\n");
+        
+        // 获取其他活跃妃子信息
+        const otherConcubines = concubines.filter(c => isActive(c) && c.id !== speaker.id);
+        const otherNames = otherConcubines.map(c => c.name).join("、");
+        
+        // 获取 speaker 的最近一条个人事件
+        const lastEvent = speaker.timeline[0]?.event || "无";
+        
+        const prompt = `你是一个宫廷角色扮演游戏中的妃子。请根据以下信息，生成一句她此刻想对皇帝（或对其他妃子）说的话。
+
+【妃子信息】
+姓名：${speaker.name}
+位份：${speaker.rank}
+圣宠：${speaker.favor}/100
+性格：${speaker.traits.join("、")}
+野心：${speaker.ambition}/100
+心机：${speaker.cunning}/100
+当前状态：${speaker.pregnancy ? "怀孕" + speaker.pregnancy.weeks + "个月" : "未怀孕"}
+最近事件：${lastEvent}
+
+【其他活跃妃子】
+${otherNames || "无"}
+
+【最近宫中大事】
+${recentLogs || "风平浪静"}
+
+要求：
+1. 只说一句话，15-30字左右
+2. 符合她的性格和当前处境
+3. 可以是撒娇、抱怨、告状、问候、讽刺等
+4. 不要超过30字
+5. 不要加任何前缀，直接输出她说的话
+6. 不要用引号包裹`;
+
+        const response = await fetch(AI_CONFIG.apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${AI_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: AI_CONFIG.model,
+                messages: [{ role: "user", content: prompt }],
+                max_tokens: 100,
+                temperature: 0.9
+            })
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("DeepSeek API 错误:", response.status, errorText);
+            return null;
+        }
+        
+        const data = await response.json();
+        let text = data.choices[0].message.content.trim();
+        // 移除可能多余的引号
+        text = text.replace(/^["']|["']$/g, '');
+        return text;
+    } catch (e) {
+        console.error("AI 对话生成失败:", e);
+        return null;
+    }
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+  
+// 健康年度变化
+function annualHealthChange(){
+    for(let f of concubines){
+        if(f.isAlive && f.status!=="cold_palace"){
+            let change = -15 + Math.floor(Math.random()*31);
+            f.health = Math.min(100, Math.max(0, f.health + change));
+            if(change!==0) addStory(`🏥 ${f.name} 健康${change>0?"+"+change:change}。`, [f.id]);
+            if(f.health<=0) killCharacter(f, true, "病逝");
+        }
+    }
+    for(let ch of children){
+        if(ch.isAlive){
+            let change = -15 + Math.floor(Math.random()*31);
+            ch.health = Math.min(100, Math.max(0, ch.health + change));
+            if(change!==0) addStory(`🏥 ${ch.name} 健康${change>0?"+"+change:change}。`, [ch.id]);
+            if(ch.health<=0) killCharacter(ch, false, "病逝");
+        }
+    }
+}
+
+// 圣宠特权检查
+function checkFavorPrivileges(f){
+    if(!isActive(f)) return;
+    
+    // 圣眷隆状态（圣宠≥95）
+    if(f.favor >= 95 && !f.hasSuperFavor){
+        f.hasSuperFavor = true;
+        addStory(`✨ ${f.name} 圣眷隆，获得「圣眷隆」状态！`, [f.id]);
+    }
+    if(f.favor < 95 && f.hasSuperFavor) f.hasSuperFavor = false;
+    
+    // 圣宠低迷检查（≤10持续6个月触发惩罚）
+    if(f.favor <= 10){
+        if(f.lowFavorMonths === undefined) f.lowFavorMonths = 1;
+        else f.lowFavorMonths++;
+    } else {
+        f.lowFavorMonths = 0;
+    }
+    
+    if(f.lowFavorMonths >= 6){
+        f.favor = Math.max(0, f.favor - 5);
+        demote(f, "圣宠低迷");
+        f.lowFavorMonths = 0;
+        addStory(`😔 ${f.name} 被皇帝遗忘，圣宠再降。`, [f.id]);
+    }
+    
+    // 圣宠=0持续4个月打入冷宫
+    if(f.favor === 0){
+        if(f.zeroFavorMonths === undefined) f.zeroFavorMonths = 1;
+        else f.zeroFavorMonths++;
+    } else {
+        f.zeroFavorMonths = 0;
+    }
+    
+    if(f.zeroFavorMonths >= 4){
+        setStatus(f, "cold_palace");
+        f.zeroFavorMonths = 0;
+    }
+}
+
+async function nextMonth(){
+    try {
+        // 生产检查（当月）
+        for(let f of concubines){
+            if(!f.isAlive || !f.pregnancy) continue;
+            if(f.pregnancy.dueYear===year && f.pregnancy.dueMonth===month){
+                let isPrince = Math.random()>0.48;
+                let order = 0;
+                if(isPrince){ globalPrinceCount++; order=globalPrinceCount; }
+                else { globalPrincessCount++; order=globalPrincessCount; }
+                let childName = `${isPrince?"皇":""}${order}${isPrince?"皇子":"公主"}`;
+                let healthVal = 50+Math.floor(Math.random()*45);
+                let talent = Math.floor(Math.random()*10);
+                let favorChild = 40+Math.floor(Math.random()*40);
+                let newChild = { id:nextChildId++, name:childName, motherId:f.id, gender:isPrince?"皇子":"公主", order, birthYear:year, birthMonth:month, health:healthVal, talent, favor:favorChild, title:"", isAlive:true, isCrownPrince:false, age:0, timeline:[], deathInfo:null };
+                children.push(newChild);
+                f.childrenIds.push(newChild.id);
+                addStory(`👶 ${f.name} 诞下${childName}！天赋${talent}`, [f.id, newChild.id]);
+                f.health = Math.max(0, f.health-5+Math.floor(Math.random()*10));
+                f.pregnancy=null;
+                if(Math.random()<0.2){ f.health-=12; addStory(`🩸 ${f.name} 产后血崩，身体大损。`, [f.id]); if(f.health<=0) killCharacter(f, true, "产后血崩"); }
+            }
+        }
+        // 月份推进
+        month++;
+        if(month>12){ month=1; year++; addStory(`🎋 新年 ${year} 年。`); annualHealthChange(); }
+        // 孕期周数
+        updatePregnancyWeeks();
+        // 状态过期
+        checkStatusExpiry();
+        // AI行动
+        aiMonthly();
+        // 孩子更新
+        updateChildren();
+        // 对话触发
+        await triggerRandomDialogue();
+        // 每月随机事件（20%概率）
+        if(Math.random() < 0.2 && AI_CONFIG.enabled && AI_CONFIG.apiKey){
+            await generateRandomEvent();
+        }
+        // 圣宠衰减
+        for(let f of concubines) decayFavor(f);
+        // 圣宠特权
+        for(let f of concubines) checkFavorPrivileges(f);
+        // 健康衰减（活跃妃子）
+        for(let f of concubines){
+            if(f.isAlive && isActive(f)){
+                f.health = Math.max(0, f.health - Math.floor(Math.random()*2));
+                if(f.health<=0) killCharacter(f, true, "病逝");
+            }
+        }
+        renderGame();
+    } catch(e) {
+        alert("游戏出错：" + e.message + "\n位置：" + e.stack);
+        addStory(`❌ 出错：${e.message}`, []);
+    }
+}
+
+// 皇帝操作
+function emperorAction(f, action){
+    if(!f.isAlive) return;
+    if(action === 'favor'){
+        if(!isActive(f)){ addStory(`⚠️ ${f.name} 正在禁足/冷宫中，无法召幸。`, [f.id]); return; }
+        let gain = getFavorGain(f.favor);
+        f.favor = Math.min(100, f.favor+gain);
+        addStory(`👑 召幸 ${f.name}，圣宠+${gain}。`,[f.id]);
+        if(Math.random()<0.05) startPregnancy(f);
+        let jealous = concubines.find(c=>isActive(c) && c.id!==f.id && Math.random()<0.5);
+        if(jealous){ jealous.relationships[f.id]=(jealous.relationships[f.id]||0)-6; addStory(`😤 ${jealous.name} 嫉妒 ${f.name}，关系恶化。`,[jealous.id,f.id]); }
+        tryPromote(f);
+    }
+    else if(action==='gift'){
+        if(!isActive(f)){ addStory(`⚠️ ${f.name} 正在禁足/冷宫中，无法接受赏赐。`, [f.id]); return; }
+        let gain = f.favor<=30?3+Math.floor(Math.random()*3) : (f.favor<=60?2+Math.floor(Math.random()*3) : (f.favor<=80?1+Math.floor(Math.random()*3) : 0+Math.floor(Math.random()*2)));
+        f.favor = Math.min(100, f.favor+gain);
+        addStory(`🎁 赏赐 ${f.name}，圣宠+${gain}。`,[f.id]);
+        tryPromote(f);
+    }
+    else if(action==='demote'){ let loss=8+Math.floor(Math.random()*10); f.favor=Math.max(0,f.favor-loss); addStory(`📉 贬斥 ${f.name}，圣宠-${loss}。`,[f.id]); if(f.favor<20) demote(f,"失宠"); }
+    else if(action==='poison'){
+        if(!isActive(f)){ addStory(`⚠️ ${f.name} 正在禁足/冷宫中，无法赐毒。`, [f.id]); return; }
+        let dmg = 15+Math.floor(Math.random()*21);
+        f.health -= dmg;
+        addStory(`☠️ 皇上赐毒 ${f.name}，健康-${dmg}！`,[f.id]);
+        if(f.health<=0) killCharacter(f, true, "被赐毒");
+    }
+    else if(action==='confine'){ if(f.status==="active") setStatus(f, "confined", 6); else addStory(`⚠️ ${f.name} 当前状态无法禁足。`, [f.id]); }
+    else if(action==='cold'){ if(f.status==="active") setStatus(f, "cold_palace"); else addStory(`⚠️ ${f.name} 当前状态无法打入冷宫。`, [f.id]); }
+    else if(action==='release'){ if(f.status!=="active") setStatus(f, "active"); else addStory(`⚠️ ${f.name} 已是自由身。`, [f.id]); }
+    else if(action==='promote'){
+        let idx=getRankIndex(f.rank);
+        if(idx===0){ addStory(`⚠️ ${f.name} 已是皇后，无法再升。`, [f.id]); return; }
+        let newRank=getRankByIndex(idx-1);
+        if((newRank==="皇后" && concubines.some(c=>c.rank==="皇后")) || (newRank==="皇贵妃" && concubines.some(c=>c.rank==="皇贵妃"))){
+            addStory(`⚠️ ${newRank} 位已有其人，无法晋升。`, [f.id]); return;
+        }
+        let oldRank=f.rank;
+        f.rank=newRank;
+        addStory(`⬆️ 皇上晋 ${f.name} 为 ${newRank}！`, [f.id]);
+        f.favor = Math.min(100, f.favor+3);
+    }
+    else if(action==='demoteRank'){
+        let idx=getRankIndex(f.rank);
+        if(idx>=RANKS.length-1){ addStory(`⚠️ ${f.name} 已是答应，无法再降。`, [f.id]); return; }
+        let newRank=getRankByIndex(idx+1);
+        let oldRank=f.rank;
+        f.rank=newRank;
+        addStory(`⬇️ 皇上降 ${f.name} 为 ${newRank}。`, [f.id]);
+        f.favor = Math.max(0, f.favor-5);
+    }
+    renderGame();
+}
+
+// 渲染
+function renderGame(){
+    document.getElementById('year').innerText = year;
+    document.getElementById('month').innerText = month;
+    let chaos=0,relCount=0;
+for(let f of concubines) {
+    if(f.relationships) {
+        for(let v of Object.values(f.relationships)){ 
+            if(v<0) chaos+=Math.abs(v); 
+            relCount++; 
+        }
+    }
+}
+chaos = Math.min(100, Math.floor(chaos/Math.max(1,relCount)));
+    document.getElementById('chaos').innerText = chaos;
+    document.getElementById('concubineCount').innerText = concubines.length;
+    document.getElementById('princeCount').innerText = globalPrinceCount;
+    document.getElementById('princessCount').innerText = globalPrincessCount;
+
+    // 妃嫔列表
+    let container = document.getElementById('concubinesList');
+    container.innerHTML = '';
+    for(let f of concubines){
+        let relText = Object.entries(f.relationships).map(([tid,val])=>{
+            let t=concubines.find(c=>c.id==tid);
+            return t?`${t.name}: ${val>0?'❤️'+val:'💔'+Math.abs(val)}`:'';
+        }).filter(s=>s).join(' · ') || '⚖️ 无恩怨';
+        let childCount = f.childrenIds.filter(cid=>children.find(ch=>ch.id===cid && ch.isAlive)).length;
+        let pregnantText = f.pregnancy ? `🤰 怀胎${f.pregnancy.weeks}月` : '';
+        let relativeText = f.relatives.map(r=>{ let rel=concubines.find(c=>c.id===r.id); return rel?`${rel.name}(${r.type})`:''; }).filter(s=>s).join(',');
+        let statusText = f.status==="confined" ? "🔒禁足中" : (f.status==="cold_palace" ? "❄️冷宫" : "✅活跃");
+        let favorClass = f.favor>=95 ? "text-gold" : (f.favor>=80 ? "" : (f.favor<=20 ? "text-red" : ""));
+        let card = document.createElement('div'); card.className = 'concubine-card';
+        card.innerHTML = `
+            <div class="concubine-header">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <button class="concubine-name" data-id="${f.id}">✏️ ${f.name}</button>
+                    <button class="btn btn-small" data-timeline="${f.id}" style="background:#a07e5c;">📜 履历</button>
+                    <button class="btn btn-small" data-thought="${f.id}" style="background:#6b8b5c;">💭 心事</button>
+                    <span class="status-badge">${statusText}</span>
+                    ${(f.rank==="皇后" || f.rank==="皇贵妃") ? `<button class="btn btn-small" data-depose="${f.id}" style="background:#8b3c1c;">❌ 废${f.rank}</button>` : ''}
+                </div>
+                <span class="concubine-rank">${f.rank}</span>
+            </div>
+            <div class="attr-row">
+                <span class="attr ${favorClass}">❤️ ${f.favor}</span><span class="attr">🧠 ${f.cunning}</span><span class="attr">💃 ${f.charm}</span>
+                <span class="attr">🩺 ${f.health}</span><span class="attr">🎯 ${f.ambition}</span>
+                <span class="attr">👶 ${childCount}子</span><span class="attr pregnancy-badge">${pregnantText}</span>
+            </div>
+            <div class="attr-row">📌 ${relText}</div>
+            <div class="attr-row">🏷️ ${f.traits.join('、')} ${relativeText?`| 亲缘:${relativeText}`:''}</div>
+            <div class="button-group">
+                <button class="btn" data-id="${f.id}" data-action="favor">🎉召幸</button>
+                <button class="btn" data-id="${f.id}" data-action="gift">🎁赏赐</button>
+                <button class="btn" data-id="${f.id}" data-action="demote">📉贬斥</button>
+                <button class="btn" data-id="${f.id}" data-action="poison">☠️赐毒</button>
+                <button class="btn" data-id="${f.id}" data-action="promote">⬆️晋位</button>
+                <button class="btn" data-id="${f.id}" data-action="demoteRank">⬇️降位</button>
+                ${f.status==="active" ? `<button class="btn" data-id="${f.id}" data-action="confine" style="background:#8b6b4a;">🔒禁足半年</button>` : ''}
+                ${f.status==="active" ? `<button class="btn" data-id="${f.id}" data-action="cold" style="background:#6b3e2a;">❄️打入冷宫</button>` : ''}
+                ${f.status!=="active" ? `<button class="btn" data-id="${f.id}" data-action="release" style="background:#4a6b3e;">🔓解禁</button>` : ''}
+            </div>
+        `;
+        container.appendChild(card);
+    }
+    // 孩子列表
+    let childrenContainer = document.getElementById('childrenList');
+    childrenContainer.innerHTML = '';
+    for(let ch of children.filter(c=>c.isAlive).sort((a,b)=>b.age-a.age)){
+        let mother = concubines.find(c=>c.id===ch.motherId);
+        let card = document.createElement('div'); card.className = 'child-card';
+        card.innerHTML = `
+            <div class="concubine-header"><span style="font-weight:bold;">👑 ${ch.name}</span><span class="child-rank-tag">${ch.gender} · ${ch.age}岁</span></div>
+            <div class="attr-row"><span class="attr">❤️ 宠爱 ${ch.favor}</span><span class="attr">🎓 天赋 ${ch.talent}</span><span class="attr">🩺 健康 ${ch.health}</span><span class="attr">🏷️ ${ch.title||'无封号'}</span>${ch.isCrownPrince?'<span class="attr">👑 太子</span>':''}</div>
+            <div class="attr-row">母妃: ${mother?mother.name:'已故'}</div>
+            <div class="button-group">
+                <button class="btn child-detail" data-childid="${ch.id}">📜 详情</button>
+                <button class="btn child-favor" data-childid="${ch.id}">🎁 赏赐</button>
+                ${!ch.isCrownPrince && ch.gender==="皇子" ? `<button class="btn child-crown" data-childid="${ch.id}">👑 立太子</button>` : ''}
+                <button class="btn child-poison" data-childid="${ch.id}" style="background:#8b3c1c;">☠️ 赐毒</button>
+                <button class="btn child-rename" data-childid="${ch.id}">✏️ 改名</button>
+            </div>
+        `;
+        childrenContainer.appendChild(card);
+    }
+    // 往生录
+    let deceasedContainer = document.getElementById('deceasedList');
+    deceasedContainer.innerHTML = '';
+    if(deceasedConcubines.length>0 || deceasedChildren.length>0){
+        if(deceasedConcubines.length>0){
+            let title1 = document.createElement('div'); title1.style.fontWeight='bold'; title1.style.margin='8px 0 4px'; title1.innerText='妃嫔往生录';
+            deceasedContainer.appendChild(title1);
+            for(let d of [...deceasedConcubines].sort((a,b)=>b.deathInfo.year - a.deathInfo.year)){
+                let div = document.createElement('div'); div.className='deceased-card';
+                div.innerHTML = `<div class="concubine-header"><button class="concubine-name" data-deceased-id="${d.id}" data-type="concubine">📜 ${d.name}</button><span>${d.rank}</span></div>
+                <div class="attr-row">⚰️ ${d.deathInfo.year}年 · ${d.deathInfo.cause}</div>`;
+                deceasedContainer.appendChild(div);
+            }
+        }
+        if(deceasedChildren.length>0){
+            let title2 = document.createElement('div'); title2.style.fontWeight='bold'; title2.style.margin='8px 0 4px'; title2.innerText='皇嗣往生录';
+            deceasedContainer.appendChild(title2);
+            for(let d of [...deceasedChildren].sort((a,b)=>b.deathInfo.year - a.deathInfo.year)){
+                let mother = concubines.find(c=>c.id===d.motherId) || deceasedConcubines.find(c=>c.id===d.motherId);
+                let div = document.createElement('div'); div.className='deceased-card';
+                div.innerHTML = `<div class="concubine-header"><button class="concubine-name" data-deceased-id="${d.id}" data-type="child">📜 ${d.name}</button><span>${d.gender}</span></div>
+                <div class="attr-row">母妃: ${mother?mother.name:'已故'} · ⚰️ ${d.deathInfo.year}年 · ${d.deathInfo.cause}</div>`;
+                deceasedContainer.appendChild(div);
+            }
+        }
+    } else {
+        deceasedContainer.innerHTML = '<div class="attr-row">暂无往生记录。</div>';
+    }
+    // 事件绑定
+    document.querySelectorAll('.concubine-name').forEach(btn=>{ btn.onclick=(e)=>{ let id=parseInt(btn.dataset.id); selectedConcubineId=id; let f=concubines.find(c=>c.id===id); if(f){ document.getElementById('newNameInput').value=f.name; document.getElementById('renameModal').style.display='flex'; } }; });
+    document.querySelectorAll('[data-timeline]').forEach(btn=>{ btn.onclick=(e)=>{ let id=parseInt(btn.dataset.timeline); let f=concubines.find(c=>c.id===id); if(f){ document.getElementById('modalName').innerHTML=`📖 ${f.name} · ${f.rank} 起居注`; document.getElementById('modalTimeline').innerHTML=f.timeline.length?f.timeline.map(t=>`<div class="timeline-item">📆 ${t.year}年${t.month}月 · ${t.event}</div>`).join(''):'<p>暂无记录</p>'; document.getElementById('timelineModal').style.display='flex'; } }; });
+    document.querySelectorAll('[data-depose]').forEach(btn=>{ btn.onclick=(e)=>{ let id=parseInt(btn.dataset.depose); let f=concubines.find(c=>c.id===id); if(f && (f.rank==="皇后"||f.rank==="皇贵妃") && confirm(`确定废黜${f.name}的${f.rank}之位吗？`)){ if(f.rank==="皇后") f.rank="妃"; else f.rank="贵妃"; addStory(`💢 ${f.name} 被废！`, [f.id]); renderGame(); } }; });
+    document.querySelectorAll('.btn[data-id]').forEach(btn=>{ btn.onclick=(e)=>{ let id=parseInt(btn.dataset.id), action=btn.dataset.action, f=concubines.find(c=>c.id===id); if(f) emperorAction(f, action); }; });
+    document.querySelectorAll('.child-detail').forEach(btn=>{ btn.onclick=(e)=>{ let cid=parseInt(btn.dataset.childid), ch=children.find(c=>c.id===cid); if(ch){ alert(`${ch.name}\n年龄:${ch.age}岁 天赋:${ch.talent} 健康:${ch.health} 宠爱:${ch.favor}\n封号:${ch.title||'无'} ${ch.isCrownPrince?'太子':''}\n生母:${concubines.find(c=>c.id===ch.motherId)?.name||'已故'}`); } }; });
+    document.querySelectorAll('.child-favor').forEach(btn=>{ btn.onclick=(e)=>{ let cid=parseInt(btn.dataset.childid), ch=children.find(c=>c.id===cid); if(ch){ ch.favor=Math.min(100,ch.favor+8); addStory(`🎁 赏赐 ${ch.name}，宠爱+8。`,[ch.id]); renderGame(); } }; });
+    document.querySelectorAll('.child-crown').forEach(btn=>{ btn.onclick=(e)=>{ let cid=parseInt(btn.dataset.childid), ch=children.find(c=>c.id===cid); if(ch && ch.gender==="皇子"){ children.forEach(c=>c.isCrownPrince=false); ch.isCrownPrince=true; addStory(`👑 立 ${ch.name} 为太子！`,[ch.id]); renderGame(); } }; });
+    document.querySelectorAll('.child-poison').forEach(btn=>{ btn.onclick=(e)=>{ let cid=parseInt(btn.dataset.childid), ch=children.find(c=>c.id===cid); if(ch && confirm(`确定要赐毒 ${ch.name} 吗？`)){ let dmg=20+Math.floor(Math.random()*31); ch.health-=dmg; addStory(`☠️ 皇上赐毒 ${ch.name}，健康-${dmg}！`,[ch.id]); if(ch.health<=0) killCharacter(ch, false, "被赐毒"); renderGame(); } }; });
+    document.querySelectorAll('.child-rename').forEach(btn=>{ btn.onclick=(e)=>{ let cid=parseInt(btn.dataset.childid), ch=children.find(c=>c.id===cid); if(ch){ let newName=prompt("新名字",ch.name); if(newName){ ch.name=newName; addStory(`✏️ ${ch.name} 改名。`,[ch.id]); renderGame(); } } }; });
+    document.querySelectorAll('[data-deceased-id]').forEach(btn=>{ btn.onclick=(e)=>{ let id=parseInt(btn.dataset.deceasedId); let type=btn.dataset.type; if(type==="concubine"){ let d=deceasedConcubines.find(c=>c.id===id); if(d){ document.getElementById('modalName').innerHTML=`📖 ${d.name} · ${d.rank} 往生录`; document.getElementById('modalTimeline').innerHTML=d.timeline.length?d.timeline.map(t=>`<div class="timeline-item">📆 ${t.year}年${t.month}月 · ${t.event}</div>`).join(''):'<p>暂无记录</p>'; document.getElementById('timelineModal').style.display='flex'; } } else if(type==="child"){ let d=deceasedChildren.find(c=>c.id===id); if(d){ document.getElementById('modalName').innerHTML=`📖 ${d.name} · ${d.gender}`; document.getElementById('modalTimeline').innerHTML=d.timeline.length?d.timeline.map(t=>`<div class="timeline-item">📆 ${t.year}年${t.month}月 · ${t.event}</div>`).join(''):'<p>暂无记录</p>'; document.getElementById('timelineModal').style.display='flex'; } } }; });
+document.querySelectorAll('[data-thought]').forEach(btn=>{ 
+    btn.onclick=(e)=>{ 
+        let id=parseInt(btn.dataset.thought); 
+        let f=concubines.find(c=>c.id===id); 
+        if(f) generateThought(f); 
+    }; 
+});
+}
+
+// 开局编辑器
+function showStartEditor(){
+    let tempList = [];
+    let count = 3 + Math.floor(Math.random() * 3);
+    for(let i=0;i<count;i++) tempList.push(generateRandomConcubine());
+    if(!tempList.some(c=>c.rank==="皇后")) tempList[0].rank="皇后";
+    if(!tempList.some(c=>c.rank==="皇贵妃") && tempList.length>1) tempList[1].rank="皇贵妃";
+    function renderEditor(){
+        let container = document.getElementById('startEditorList');
+        if(!container) return;
+        container.innerHTML = '';
+        tempList.forEach((f,idx)=>{
+            let div = document.createElement('div'); div.className='editor-row';
+            div.innerHTML = `
+                <input type="text" value="${f.name}" style="width:90px;" data-idx="${idx}" data-field="name">
+                <select data-idx="${idx}" data-field="rank" style="width:85px;">${RANKS.map(r=>`<option value="${r}" ${f.rank===r?'selected':''}>${r}</option>`).join('')}</select>
+                <input type="number" value="${f.ambition}" min="0" max="100" style="width:55px;" data-idx="${idx}" data-field="ambition">
+                <input type="number" value="${f.cunning}" min="30" max="100" style="width:55px;" data-idx="${idx}" data-field="cunning">
+                <select data-idx="${idx}" data-field="traits" style="width:100px;">${TRAITS_SET.map(t=>`<option value="${t.join(',')}" ${f.traits.join(',')===t.join(',')?'selected':''}>${t.join('·')}</option>`).join('')}</select>
+                <button class="remove-editor-btn" data-idx="${idx}" style="background:#bc8b5c; border:none; color:white; border-radius:20px; padding:4px 10px;">❌删除</button>
+            `;
+            container.appendChild(div);
+        });
+        let addBtn = document.createElement('button'); addBtn.innerText='+ 添加新妃子'; addBtn.className='btn'; addBtn.style.marginTop='8px';
+        addBtn.onclick = ()=>{ tempList.push(generateRandomConcubine()); renderEditor(); };
+        container.appendChild(addBtn);
+        document.querySelectorAll('#startEditorList input, #startEditorList select').forEach(el=>{
+            el.addEventListener('change',(e)=>{
+                let idx=parseInt(el.dataset.idx), field=el.dataset.field;
+                if(field==='name') tempList[idx].name=el.value;
+                else if(field==='rank') tempList[idx].rank=el.value;
+                else if(field==='ambition') tempList[idx].ambition=parseInt(el.value);
+                else if(field==='cunning') tempList[idx].cunning=parseInt(el.value);
+                else if(field==='traits') tempList[idx].traits=el.value.split(',');
+            });
+        });
+        document.querySelectorAll('.remove-editor-btn').forEach(btn=>{ btn.onclick=()=>{ let idx=parseInt(btn.dataset.idx); tempList.splice(idx,1); renderEditor(); }; });
+    }
+    let modal = document.createElement('div'); modal.id='startEditorModal'; modal.className='modal'; modal.style.display='flex';
+    modal.innerHTML = `<div class="modal-content" style="max-width:700px;"><h3>📝 开局后宫编辑</h3><p style="font-size:0.75rem;">可修改名字、位份、野心、心机、性格。皇后/皇贵妃只能各有一位。</p><div id="startEditorList" style="max-height:400px; overflow-y:auto;"></div><div class="flex-btns" style="margin-top:16px;"><button id="startGameBtn" class="btn" style="background:#6b8c5c; flex:1;">✅ 确认开局</button><button id="randomStartBtn" class="btn" style="background:#bc8b5c; flex:1;">🎲 重新随机</button></div></div>`;
+    document.body.appendChild(modal);
+    renderEditor();
+    document.getElementById('startGameBtn').onclick = ()=>{
+        let queenCount = tempList.filter(f=>f.rank==="皇后").length;
+        let imperialCount = tempList.filter(f=>f.rank==="皇贵妃").length;
+        if(queenCount>1){ alert("皇后只能有一位！"); return; }
+        if(imperialCount>1){ alert("皇贵妃只能有一位！"); return; }
+        if(queenCount===0 && tempList.length>0) tempList[0].rank="皇后";
+        concubines = []; children = []; deceasedConcubines = []; deceasedChildren = [];
+        nextConcubineId=1; nextChildId=1;
+        globalPrinceCount=0; globalPrincessCount=0; globalStory=[]; year=1; month=1;
+        for(let cfg of tempList){
+            let relationships = {};
+            for(let ex of concubines) relationships[ex.id]=Math.floor(Math.random()*80)-40;
+            let newF = {...cfg, id:nextConcubineId++, relationships, childrenIds:[], pregnancy:null, isAlive:true, status:"active", statusEndYear:0, statusEndMonth:0, timeline:[], lastPromoteYear:0, lastRecommendYear:-99, relatives:cfg.relatives||[], deathInfo:null, lowFavorMonths:0, zeroFavorMonths:0, hasSuperFavor:false};
+            concubines.push(newF);
+        }
+        for(let f of concubines) for(let other of concubines) if(f.id!==other.id && f.relationships[other.id]===undefined) f.relationships[other.id]=Math.floor(Math.random()*80)-40;
+        modal.remove();
+        renderGame();
+        addStory("🌟 后宫新篇开启，圣上临朝。");
+    };
+    document.getElementById('randomStartBtn').onclick = ()=>{
+        tempList = [];
+        let newCount = 3+Math.floor(Math.random()*3);
+        for(let i=0;i<newCount;i++) tempList.push(generateRandomConcubine());
+        if(!tempList.some(c=>c.rank==="皇后")) tempList[0].rank="皇后";
+        if(!tempList.some(c=>c.rank==="皇贵妃") && tempList.length>1) tempList[1].rank="皇贵妃";
+        renderEditor();
+    };
+}
+
+// 选秀/皇后选举
+function showDraftModal(){
+    let newName = randomName();
+    document.getElementById('draftPreview').innerText = newName;
+    document.getElementById('draftNameInput').value = newName;
+    document.getElementById('draftModal').style.display = 'flex';
+}
+function addCustomConcubine(name){
+    if(!name.trim()){ alert("请输入姓名"); return false; }
+    let cfg = generateRandomConcubine();
+    cfg.name = name.trim();
+    cfg.relationships = {};
+    for(let ex of concubines) cfg.relationships[ex.id]=Math.floor(Math.random()*80)-40;
+    cfg.id = nextConcubineId++;
+    concubines.push(cfg);
+    addStory(`🌸 新秀入宫，封 ${cfg.rank} · ${cfg.name}。`, [cfg.id]);
+    renderGame();
+    return true;
+}
+function showSetQueenModal(){
+    let candidates = concubines.filter(c=>c.isAlive && (c.rank==="贵妃"||c.rank==="皇贵妃"||c.rank==="夫人"||c.rank==="妃") && c.rank!=="皇后");
+    let container = document.getElementById('queenCandidatesList');
+    if(candidates.length===0) container.innerHTML='<p>暂无可册立的高位妃嫔（妃位及以上）</p>';
+    else {
+        container.innerHTML = candidates.map(f=>`<div class="queen-candidate"><strong>${f.name}</strong> (${f.rank}) <button class="btn" data-queenid="${f.id}">册立为后</button></div>`).join('');
+        document.querySelectorAll('[data-queenid]').forEach(btn=>{ btn.onclick=()=>{ let id=parseInt(btn.dataset.queenid), newQueen=concubines.find(c=>c.id===id); if(newQueen){ let oldQueen=concubines.find(c=>c.rank==="皇后"); if(oldQueen) oldQueen.rank="贵妃"; newQueen.rank="皇后"; addStory(`👑 册立 ${newQueen.name} 为皇后！`, [newQueen.id]); document.getElementById('selectQueenModal').style.display='none'; renderGame(); } }; });
+    }
+    document.getElementById('selectQueenModal').style.display='flex';
+}
+
+// ======================= AI 增强功能 =======================
+
+// 1. 妃子心事
+async function generateThought(f) {
+    if(!AI_CONFIG.enabled || !AI_CONFIG.apiKey){
+        addStory(`❌ AI 未启用，无法窥探 ${f.name} 的心事。`, [f.id]);
+        return;
+    }
+    
+    addStory(`🤔 皇上试图揣摩 ${f.name} 的心事……`, [f.id]);
+    
+    try {
+        // 获取她最近的3件个人事件
+        const recentEvents = f.timeline.slice(0, 3).map(e => e.event).join("；") || "无特别事件";
+        
+        // 获取她与几位主要妃子的关系
+        const relations = Object.entries(f.relationships)
+            .slice(0, 5)
+            .map(([tid, val]) => {
+                let target = concubines.find(c => c.id == tid);
+                return target ? `${target.name}: ${val > 0 ? "友善" + val : "敌视" + Math.abs(val)}` : "";
+            })
+            .filter(s => s)
+            .join("，");
+        
+        const prompt = `你是一个深宫妃子。请根据以下信息，用第一人称写一段她此刻的内心独白（40-80字）：
+
+【妃子】${f.name}，${f.rank}，圣宠${f.favor}
+【性格】${f.traits.join("、")}
+【野心】${f.ambition}，心机${f.cunning}
+【状态】${f.pregnancy ? "怀孕" + f.pregnancy.weeks + "个月" : "未怀孕"}
+【最近经历】${recentEvents}
+【人际关系】${relations || "无特别恩怨"}
+
+要求：
+1. 用「」包裹
+2. 符合她的性格和处境
+3. 可以表达喜怒哀乐、嫉妒、野心、恐惧等
+4. 不要超过80字`;
+
+        const response = await fetch(AI_CONFIG.apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${AI_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: AI_CONFIG.model,
+                messages: [{ role: "user", content: prompt }],
+                max_tokens: 200,
+                temperature: 0.85
+            })
+        });
+        
+        if(!response.ok) throw new Error("API 错误");
+        
+        const data = await response.json();
+        let thought = data.choices[0].message.content.trim();
+        addStory(`💭 ${f.name} 心中暗想：${thought}`, [f.id]);
+        
+    } catch(e) {
+        console.error("心事生成失败:", e);
+        addStory(`❌ 无法窥探 ${f.name} 的心事，她似乎心事重重。`, [f.id]);
+    }
+}
+
+// 2. 随机宫廷事件
+async function generateRandomEvent() {
+    try {
+        // 获取后宫简要局势
+        const topFavor = [...concubines].sort((a,b) => b.favor - a.favor).slice(0, 3).map(c => `${c.name}(${c.rank})`).join("、");
+        const pregnant = concubines.filter(c => c.pregnancy).map(c => `${c.name}(怀胎${c.pregnancy.weeks}月)`).join("、") || "无";
+        const topHostile = [...concubines].sort((a,b) => {
+            let aHostile = Object.values(a.relationships).filter(v => v < -15).length;
+            let bHostile = Object.values(b.relationships).filter(v => v < -15).length;
+            return bHostile - aHostile;
+        }).slice(0, 2).map(c => c.name).join("、");
+        
+        const prompt = `你是一个宫廷事件生成器。请根据当前后宫局势，生成一个有趣的事件（40-80字）。
+
+【当前局势】
+- 圣宠前三：${topFavor}
+- 怀孕妃子：${pregnant}
+- 树敌最多：${topHostile || "无"}
+
+要求：
+1. 事件可以是妃子之间的冲突、意外、喜事、阴谋等
+2. 必须包含具体妃子名字
+3. 只输出事件描述，不要加其他说明`;
+
+        const response = await fetch(AI_CONFIG.apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${AI_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: AI_CONFIG.model,
+                messages: [{ role: "user", content: prompt }],
+                max_tokens: 200,
+                temperature: 0.9
+            })
+        });
+        
+        if(!response.ok) throw new Error("API 错误");
+        
+        const data = await response.json();
+        const eventText = data.choices[0].message.content.trim();
+        
+        addStory(`🎭 ${eventText}`, []);
+        renderGame();
+        
+    } catch(e) {
+        console.error("随机事件生成失败:", e);
+    }
+}
+
+// 3. 临终回顾
+async function generateDeathReview(f) {
+    try {
+        // 获取她一生的关键事件
+        const keyEvents = f.timeline.slice(0, 10).map(e => e.event).join("；");
+        const childNames = children.filter(c => c.motherId === f.id).map(c => c.name).join("、") || "无子嗣";
+        
+        const prompt = `你是一个史官。请为以下去世的妃子写一段简短的临终回顾/悼词（50-80字）：
+
+【妃子】${f.name}，${f.rank}，享年${f.deathInfo.age}岁
+【性格】${f.traits.join("、")}
+【一生大事】${keyEvents}
+【子嗣】${childNames}
+【死因】${f.deathInfo.cause}
+
+要求：
+1. 古风文笔，哀而不伤
+2. 概括她的一生
+3. 不要超过80字
+4. 直接输出悼词，不要加任何前缀`;
+
+        const response = await fetch(AI_CONFIG.apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${AI_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: AI_CONFIG.model,
+                messages: [{ role: "user", content: prompt }],
+                max_tokens: 200,
+                temperature: 0.75
+            })
+        });
+        
+        if(!response.ok) throw new Error("API 错误");
+        
+        const data = await response.json();
+        const review = data.choices[0].message.content.trim();
+        addStory(`📜 ${review}`, [f.id]);
+        
+    } catch(e) {
+        console.error("临终回顾生成失败:", e);
+        addStory(`📜 ${f.name} 薨逝，宫中为之惋惜。`, [f.id]);
+    }
+}
+  
+// 折叠功能
+function setupCollapse(){
+    let toggleC = document.getElementById('toggleConcubines');
+    let toggleCh = document.getElementById('toggleChildren');
+    let toggleD = document.getElementById('toggleDeceased');
+    let contentC = document.getElementById('concubinesList');
+    let contentCh = document.getElementById('childrenList');
+    let contentD = document.getElementById('deceasedList');
+    let iconC = toggleC.querySelector('.collapse-icon');
+    let iconCh = toggleCh.querySelector('.collapse-icon');
+    let iconD = toggleD.querySelector('.collapse-icon');
+    
+    toggleC.onclick = () => {
+        if(contentC.style.display === 'none') {
+            contentC.style.display = 'block';
+            iconC.innerText = '▼';
+        } else {
+            contentC.style.display = 'none';
+            iconC.innerText = '▶';
+        }
+    };
+    toggleCh.onclick = () => {
+        if(contentCh.style.display === 'none') {
+            contentCh.style.display = 'block';
+            iconCh.innerText = '▼';
+        } else {
+            contentCh.style.display = 'none';
+            iconCh.innerText = '▶';
+        }
+    };
+    toggleD.onclick = () => {
+        if(contentD.style.display === 'none') {
+            contentD.style.display = 'block';
+            iconD.innerText = '▼';
+        } else {
+            contentD.style.display = 'none';
+            iconD.innerText = '▶';
+        }
+    };
+}
+
+// 事件绑定
+document.getElementById('confirmRenameBtn')?.addEventListener('click',()=>{ let newName=document.getElementById('newNameInput').value.trim(); if(newName){ let f=concubines.find(c=>c.id===selectedConcubineId); if(f){ let old=f.name; f.name=newName; addStory(`✏️ ${old} 更名为 ${newName}。`,[f.id]); renderGame(); } } document.getElementById('renameModal').style.display='none'; });
+document.getElementById('closeRenameModal')?.addEventListener('click',()=>document.getElementById('renameModal').style.display='none');
+document.getElementById('closeDraftModal')?.addEventListener('click',()=>document.getElementById('draftModal').style.display='none');
+document.getElementById('closeTimelineModal')?.addEventListener('click',()=>document.getElementById('timelineModal').style.display='none');
+document.getElementById('closeQueenModal')?.addEventListener('click',()=>document.getElementById('selectQueenModal').style.display='none');
+document.getElementById('randomDraftBtn')?.addEventListener('click',()=>{ let nm=randomName(); document.getElementById('draftPreview').innerText=nm; document.getElementById('draftNameInput').value=nm; });
+document.getElementById('confirmDraftBtn')?.addEventListener('click',()=>{ let name=document.getElementById('draftNameInput').value; if(addCustomConcubine(name)) document.getElementById('draftModal').style.display='none'; });
+document.getElementById('nextMonthBtn')?.addEventListener('click',nextMonth);
+document.getElementById('addRandomBtn')?.addEventListener('click',showDraftModal);
+document.getElementById('setQueenBtn')?.addEventListener('click',showSetQueenModal);
+window.onclick = (e)=>{ if(e.target.classList.contains('modal')) e.target.style.display='none'; };
+
+// 启动
+showStartEditor();
+setupCollapse();
+</script>
+</body>
+</html>
