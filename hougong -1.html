@@ -289,6 +289,20 @@ body {
 const RANKS = ["皇后","皇贵妃","夫人","贵妃","妃","昭仪","贵嫔","婕妤","容华","婉仪","嫔","小仪","贵人","美人","常在","答应"];
 const RANK_INDEX = Object.fromEntries(RANKS.map((r,i)=>[r,i]));
 function getRankIndex(r){ return RANK_INDEX[r]??15; }
+// 设置双向好感关系
+function setRelationship(f1, f2, value){
+    if(!f1 || !f2) return;
+    f1.relationships[f2.id] = value;
+    f2.relationships[f1.id] = value;
+}
+
+// 增加双向好感
+function addRelationship(f1, f2, delta){
+    if(!f1 || !f2) return;
+    let newVal = (f1.relationships[f2.id] || 0) + delta;
+    newVal = Math.min(100, Math.max(-100, newVal));
+    setRelationship(f1, f2, newVal);
+}
 function getRankByIndex(i){ return RANKS[Math.min(i,RANKS.length-1)]; }
 
 // 姓名字库
@@ -345,10 +359,26 @@ function generateRandomConcubine(sameSurname=null, relationFromId=null, kinshipT
     let health = 60+Math.floor(Math.random()*35);
     let ambition = 20+Math.floor(Math.random()*70);
     let rank = "答应";
-    if(favor>72) rank="贵人"; if(favor>86) rank="嫔"; if(favor>93) rank="妃";
+    if(favor>72) rank="贵人"; 
+    if(favor>86) rank="嫔"; 
+    if(favor>93) rank="妃";
     let secrets = Math.random()>0.8 ? ["巫蛊之术","与太医私通","偷窃贡品","私放高利贷"] : [];
     let relatives = relationFromId ? [{id:relationFromId, type:kinshipType}] : [];
-    return { name, traits, favor, cunning, charm, health, ambition, rank, secrets, relatives, relationships:{}, childrenIds:[], pregnancy:null, isAlive:true, status:"active", statusEndYear:0, statusEndMonth:0, timeline:[], lastPromoteYear:0, lastRecommendYear:-99, deathInfo:null };
+    
+return { 
+    name, traits, favor, cunning, charm, health, ambition, rank, 
+    secrets, relatives, relationships: {}, childrenIds: [], 
+    pregnancy: null, isAlive: true, status: "active", 
+    statusEndYear: 0, statusEndMonth: 0, timeline: [], 
+    lastPromoteYear: 0, lastRecommendYear: -99, deathInfo: null,
+    entryYear: year,
+    highestRank: rank,
+    recentDialogue: [],
+    currentGoal: null,
+    goalExpireYear: 0,
+    recentFavors: 0,     // 新增
+    lastFavorMonth: 0    // 新增
+};
 }
 
 // 死亡处理
@@ -390,6 +420,93 @@ function decayFavor(f){
 function successRate(attacker, defender, base=0.3){
     let rate = base + (attacker.cunning - defender.cunning)/200 + attacker.ambition/200;
     return Math.min(0.85, Math.max(0.15, rate));
+}
+// ======================= AI 增强辅助函数 =======================
+
+// 获取妃子的情感状态
+function getEmotionalState(f) {
+    if(!f.isAlive) return "已故";
+    
+    // 最近事件影响（从 timeline 中分析）
+    const lastEvent = f.timeline[0]?.event || "";
+    if(lastEvent.includes("陷害") && lastEvent.includes(f.name)) return "愤怒（刚被陷害）";
+    if(lastEvent.includes("晋") && lastEvent.includes(f.name)) return "得意（刚获晋升）";
+    if(lastEvent.includes("贬斥") && lastEvent.includes(f.name)) return "沮丧（被贬）";
+    if(lastEvent.includes("诞下")) return "喜悦（喜得子嗣）";
+    if(lastEvent.includes("小产")) return "悲痛（痛失子嗣）";
+    
+    // 圣宠影响
+    if(f.favor >= 90) return "春风得意";
+    if(f.favor >= 70) return "心满意足";
+    if(f.favor >= 50) return "平静";
+    if(f.favor >= 30) return "忐忑不安";
+    if(f.favor >= 10) return "焦虑";
+    return "绝望";
+}
+
+// 获取妃子最恨的人
+function getMostHated(f) {
+    let minVal = 0;
+    let minTarget = null;
+    for(let [tid, val] of Object.entries(f.relationships)){
+        if(val < minVal){
+            minVal = val;
+            minTarget = concubines.find(c => c.id == tid);
+        }
+    }
+    return minTarget ? minTarget.name : null;
+}
+
+// 获取妃子最怕的人（关系差且位份高）
+function getMostFeared(f) {
+    let fearScore = 0;
+    let feared = null;
+    for(let [tid, val] of Object.entries(f.relationships)){
+        let target = concubines.find(c => c.id == tid);
+        if(target && val < -10){
+            let score = Math.abs(val) + (getRankIndex(target.rank) < getRankIndex(f.rank) ? 20 : 0);
+            if(score > fearScore){
+                fearScore = score;
+                feared = target;
+            }
+        }
+    }
+    return feared ? feared.name : null;
+}
+
+// 获取妃子当前目标（动态生成或缓存）
+function getCurrentGoal(f) {
+    // 如果已有目标且未过期，直接返回
+    if(f.currentGoal && year < f.goalExpireYear){
+        return f.currentGoal;
+    }
+    
+    // 生成新目标
+    let goal = "";
+    const idx = getRankIndex(f.rank);
+    
+    if(f.ambition > 80){
+        if(idx > 5) goal = "她想晋升位份，获得更高地位";
+        else if(idx <= 5 && idx > 0) goal = "她想成为皇后/皇贵妃";
+        else goal = "她想保住现有地位";
+    } else if(f.traits.includes("善妒")){
+        let hated = getMostHated(f);
+        if(hated) goal = `她想让 ${hated} 失宠或倒霉`;
+        else goal = "她想打压比自己受宠的妃子";
+    } else if(f.favor < 30){
+        goal = "她想重新获得皇帝的宠爱";
+    } else if(f.pregnancy){
+        goal = "她想平安生下孩子，并借此巩固地位";
+    } else if(f.childrenIds.length > 0){
+        goal = `她想为 ${f.childrenIds.length} 个孩子谋取更好的前程`;
+    } else {
+        goal = "她想在后宫安稳度日";
+    }
+    
+    // 缓存目标，有效期12个月
+    f.currentGoal = goal;
+    f.goalExpireYear = year + 1;
+    return goal;
 }
 
 // 状态检查
@@ -503,27 +620,43 @@ function updatePregnancyWeeks(){
 // AI行动
 function aiMonthly(){
     for(let f of concubines.filter(c=>isActive(c))){
+        // 争宠
         if(Math.random()<0.4 && (f.favor<65 || f.traits.includes("善妒"))){
             let success = Math.random()<(f.charm/100);
-            if(success){ let gain=2+Math.floor(Math.random()*4); f.favor=Math.min(100,f.favor+gain); addStory(`✨ ${f.name} 争宠献艺，圣宠+${gain}。`, [f.id]);}
-            else addStory(`😞 ${f.name} 争宠失败。`, [f.id]);
+            if(success){ 
+                let gain=2+Math.floor(Math.random()*4); 
+                f.favor=Math.min(100,f.favor+gain); 
+                addStory(`✨ ${f.name} 争宠献艺，圣宠+${gain}。`, [f.id]);
+            } else { 
+                // addStory(`😞 ${f.name} 争宠失败。`, [f.id]);
+            }
         }
+        // 陷害
         else if(f.cunning>70 && (f.traits.includes("霸道")||f.traits.includes("阴险")) && Math.random()<0.35){
             let enemies = concubines.filter(c=>isActive(c) && c.id!==f.id && (f.relationships[c.id]<-10 || c.favor>f.favor+10));
             if(enemies.length){
                 let target = enemies[Math.floor(Math.random()*enemies.length)];
                 if(Math.random()<f.cunning/(target.cunning+55)){
-                    let hurt = 3+Math.floor(Math.random()*8); target.favor=Math.max(0,target.favor-hurt);
-                    f.relationships[target.id]=(f.relationships[target.id]||0)-5;
+                    let hurt = 3+Math.floor(Math.random()*8); 
+                    target.favor=Math.max(0,target.favor-hurt);
+                    addRelationship(f, target, -5);
                     addStory(`🗡️ ${f.name} 陷害 ${target.name}，圣宠-${hurt}。`, [f.id,target.id]);
-                } else { f.favor=Math.max(0,f.favor-6); addStory(`💢 ${f.name} 陷害败露，圣宠-6。`, [f.id]);}
+                } else { 
+                    f.favor=Math.max(0,f.favor-6); 
+                    addStory(`💢 ${f.name} 陷害败露，圣宠-6。`, [f.id]);
+                }
             }
         }
+        // 结为姐妹
         else if(Math.random()<0.12 && !f.traits.includes("善妒")){
             let friend = concubines.filter(c=>isActive(c) && c.id!==f.id && (f.relationships[c.id]||0)<25)[0];
-            if(friend){ f.relationships[friend.id]=(f.relationships[friend.id]||0)+8; addStory(`🌺 ${f.name} 与 ${friend.name} 结为姐妹。`, [f.id,friend.id]);}
+            if(friend){
+                addRelationship(f, friend, 8);
+                addStory(`🌺 ${f.name} 与 ${friend.name} 结为姐妹。`, [f.id, friend.id]);
+            }
         }
-        // AI下毒
+        
+        // AI下毒（独立于上面的 else if）
         if(Math.random()<0.04 && f.cunning>65){
             let enemies = concubines.filter(c=>isActive(c) && c.id!==f.id && (f.relationships[c.id]<-15));
             if(enemies.length){
@@ -564,8 +697,11 @@ function aiMonthly(){
                 let newF = generateRandomConcubine(f.name.charAt(0), f.id, "嫡妹");
                 newF.name = newName;
                 newF.relationships = {};
-                for(let ex of concubines) newF.relationships[ex.id] = Math.floor(Math.random()*60)-30;
-                newF.relationships[f.id] = 40 + Math.floor(Math.random()*20);
+                for(let ex of concubines){
+                    let relVal = Math.floor(Math.random()*60)-30;
+                    setRelationship(newF, ex, relVal);
+                }
+                setRelationship(newF, f, 40 + Math.floor(Math.random()*20));
                 newF.id = nextConcubineId++;
                 concubines.push(newF);
                 f.lastRecommendYear = year;
@@ -574,7 +710,9 @@ function aiMonthly(){
         }
     }
     // 自然怀孕
-    for(let f of concubines){ if(!f.pregnancy && isActive(f) && Math.random()<0.04 && f.favor>45) startPregnancy(f); }
+    for(let f of concubines){ 
+        if(!f.pregnancy && isActive(f) && Math.random()<0.04 && f.favor>45) startPregnancy(f); 
+    }
 }
 
 function updateChildren(){
@@ -763,44 +901,118 @@ function useSingleTemplateDialogue(speaker, activeList) {
     if (dialogText) addStory(`💬 ${speaker.name} 说：${dialogText}`, [speaker.id]);
 }
 
-// AI 生成对话（DeepSeek）
+// AI 生成对话（升级版 - 有情绪、有目标、有短期记忆）
 async function generateAIDialogue(speaker) {
+    if(!AI_CONFIG.enabled || !AI_CONFIG.apiKey) return null;
+    
     try {
-        // 获取最近5条日志作为上下文
+        const isToEmperor = Math.random() < 0.5;
+        let target = null;
+        if (!isToEmperor) {
+            const others = concubines.filter(c => isActive(c) && c.id !== speaker.id);
+            if (others.length > 0) target = others[Math.floor(Math.random() * others.length)];
+        }
+        
         const recentLogs = globalStory.slice(0, 5).join("\n");
+        const shortTermMemory = speaker.recentDialogue.slice(0, 3).join("；") || "无";
+        const emotionalState = getEmotionalState(speaker);
+        const mostHated = getMostHated(speaker);
+        const mostFeared = getMostFeared(speaker);
+        const currentGoal = getCurrentGoal(speaker);
         
-        // 获取其他活跃妃子信息
-        const otherConcubines = concubines.filter(c => isActive(c) && c.id !== speaker.id);
-        const otherNames = otherConcubines.map(c => c.name).join("、");
+        let relationInfo = "";
+        let rankComparison = "";
+        if(target){
+            const relVal = speaker.relationships[target.id] || 0;
+            const speakerRankIdx = getRankIndex(speaker.rank);
+            const targetRankIdx = getRankIndex(target.rank);
+            
+            if(relVal > 20) relationInfo = `她与${target.name}关系很好，视作姐妹`;
+            else if(relVal > 0) relationInfo = `她与${target.name}关系一般，点头之交`;
+            else if(relVal > -20) relationInfo = `她与${target.name}关系冷淡，互相看不惯`;
+            else relationInfo = `她与${target.name}是死对头，恨之入骨`;
+            
+            if(targetRankIdx < speakerRankIdx) rankComparison = `⚠️ 对方（${target.name}）位份更高（${target.rank} > ${speaker.rank}），你必须用敬称「娘娘」！`;
+            else if(targetRankIdx > speakerRankIdx) rankComparison = `对方（${target.name}）位份更低（${target.rank} < ${speaker.rank}），你可以随意称呼`;
+            else rankComparison = `对方（${target.name}）位份与你相同（${target.rank}），平等称呼即可`;
+        }
         
-        // 获取 speaker 的最近一条个人事件
-        const lastEvent = speaker.timeline[0]?.event || "无";
-        
-        const prompt = `你是一个宫廷角色扮演游戏中的妃子。请根据以下信息，生成一句她此刻想对皇帝（或对其他妃子）说的话。
+        const prompt = `你是一个宫廷角色扮演游戏中极具真实感的妃子。请完全代入她的身份，根据以下信息，生成她此刻想说的话。
 
-【妃子信息】
+========================================
+【性格风格要求】（根据她的性格，调整潜台词的语气，严禁所有性格都使用相同的刻薄语气）
+【说话语气铁律】（按优先级从高到低执行）
+
+🚨 第1优先级：根据【她与说话对象的关系】决定语气
+${target ? `当前她与 ${target.name} 的关系值：${speaker.relationships[target.id] || 0}` : "说话对象是皇帝"}
+- 如果关系值 > 20：必须用友善、亲昵的语气（如“姐姐”、“妹妹”），可以关心问候
+- 如果关系值 -20 到 20：用正常、客气的语气
+- 如果关系值 < -20：可以用冷淡、讽刺的语气
+
+🚨 第2优先级：关系值正常时，再参考以下性格风格
+⚠️ 重要：即使她性格“阴险毒辣”，如果与对方关系好（关系值 > 20），也必须友善，不能说刻薄话！
+${speaker.traits.includes("善妒") && speaker.traits.includes("霸道") ? "她性格善妒霸道，心里容易嫉妒受宠的妃子，但嘴上不会直接骂人，更多是酸溜溜的抱怨或暗中算计的想法，可以说‘凭什么她能得到皇上的宠爱’这类话" : ""}
+${speaker.traits.includes("端庄") && speaker.traits.includes("贤惠") ? "她性格端庄贤惠，心里想的事情多是关于责任、礼仪、关心他人，即使有委屈也会委婉表达，不会恶毒咒骂，可以说‘本宫行得正坐得端，不屑与她们争’这类话" : ""}
+${speaker.traits.includes("聪慧") && speaker.traits.includes("隐忍") ? "她性格聪慧隐忍，心里想的事情比较缜密，会权衡利弊，即使受委屈也会暂时忍耐，寻找合适时机，不会直接诅咒，可以说‘现在不是出手的时候，再等等’这类话" : ""}
+${speaker.traits.includes("敏感") && speaker.traits.includes("多疑") ? "她性格敏感多疑，心里容易胡思乱想，觉得别人在针对自己，但更多的是自怜和不安，不会主动恶毒咒骂，可以说‘她们是不是在背后说我坏话…’这类话" : ""}
+${speaker.traits.includes("活泼") && speaker.traits.includes("天真") ? "她性格活泼天真，心里想的事情多是孩子气、爱玩、想要关注和赏赐，不会恶毒，可以说‘皇上今天会不会来看我呀’、‘那件新衣裳真好看’这类话" : ""}
+${speaker.traits.includes("野心") && speaker.traits.includes("果断") ? "她性格野心果断，心里想的多是如何往上爬、如何获得更多权力，说话干脆直接，但不会低劣地辱骂，可以说‘这个位置迟早是我的’、‘挡我者必须除掉’这类话" : ""}
+${speaker.traits.includes("阴险") && speaker.traits.includes("毒辣") ? "她性格阴险毒辣，心里可以想一些算计、陷害的内容，但也要有逻辑，可以说‘借刀杀人，让她自己倒霉’这类话" : ""}
+${speaker.traits.includes("温婉") && speaker.traits.includes("知礼") ? "她性格温婉知礼，心里想的事情多是温和的，即使生气也不会说重话，最多是暗暗失望，可以说‘唉，随她去吧，何必计较’这类话" : ""}
+${speaker.traits.includes("刚烈") && speaker.traits.includes("直率") ? "她性格刚烈直率，心里有不满会直接表达，但不会拐弯抹角地诅咒，可以说‘她算什么东西，也配跟本宫争？’但不会用下三滥的脏话" : ""}
+
+如果没有匹配到具体性格，则使用默认风格：她心里想法可以有一定的情绪波动，但不要使用低劣的辱骂词汇。
+
+【她的身份与背景】
 姓名：${speaker.name}
-位份：${speaker.rank}
+位份：${speaker.rank}（等级 ${getRankIndex(speaker.rank)}，越小越高）
 圣宠：${speaker.favor}/100
 性格：${speaker.traits.join("、")}
 野心：${speaker.ambition}/100
 心机：${speaker.cunning}/100
-当前状态：${speaker.pregnancy ? "怀孕" + speaker.pregnancy.weeks + "个月" : "未怀孕"}
-最近事件：${lastEvent}
+入宫年份：${speaker.entryYear || "未知"}年
+历史最高位份：${speaker.highestRank || speaker.rank}
 
-【其他活跃妃子】
-${otherNames || "无"}
+【她当前的状态】
+身体状况：${speaker.pregnancy ? "怀孕" + speaker.pregnancy.weeks + "个月" : "未怀孕"}
+情感状态：${emotionalState}
+健康：${speaker.health}/100
+
+【她的人际关系】
+${mostHated ? `最恨的人：${mostHated}` : "没有特别恨的人"}
+${mostFeared ? `最怕的人：${mostFeared}` : "没有特别怕的人"}
+她最近发生的事：${speaker.timeline[0]?.event || "无特别事件"}
+
+【她此刻的目的】
+${currentGoal}
+
+========================================
+${target ? `【说话对象】${target.name}（${target.rank}，等级 ${getRankIndex(target.rank)}）
+${relationInfo}
+${rankComparison}` : "【说话对象】皇帝陛下"}
+
+【她的短期记忆】（最近说过的话）
+${shortTermMemory}
 
 【最近宫中大事】
 ${recentLogs || "风平浪静"}
 
-要求：
-1. 只说一句话，15-30字左右
-2. 符合她的性格和当前处境
-3. 可以是撒娇、抱怨、告状、问候、讽刺等
-4. 不要超过30字
-5. 不要加任何前缀，直接输出她说的话
-6. 不要用引号包裹`;
+========================================
+【任务要求】
+1. 先输出她心中的「潜台词」（用【】包裹，40-80字），表达她真实的想法
+2. 再输出她实际说出来的话（用「」包裹，30-60字）
+3. 潜台词要真实、阴暗、有人情味
+4. 实际说出的话必须严格遵守以下位份等级规则：
+   - 对皇帝：必须用「陛下」或「皇上」，自称「臣妾」
+   - 对位份高于自己的妃子：必须用「娘娘」或「姐姐」，绝对不能直呼其名
+   - 对位份低于自己的妃子：可以用「妹妹」或直呼其名
+   - 绝对不能叫错位份（如把皇后叫成嫔妃）
+5. 不要输出其他多余内容，格式严格如下：
+
+【潜台词】
+「说出的话」
+
+请直接输出：`;
 
         const response = await fetch(AI_CONFIG.apiUrl, {
             method: "POST",
@@ -811,23 +1023,56 @@ ${recentLogs || "风平浪静"}
             body: JSON.stringify({
                 model: AI_CONFIG.model,
                 messages: [{ role: "user", content: prompt }],
-                max_tokens: 100,
-                temperature: 0.9
+                max_tokens: 280,
+                temperature: 0.96,
+                top_p: 0.92,
+                frequency_penalty: 0.4,
+                presence_penalty: 0.4
             })
         });
         
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error("DeepSeek API 错误:", response.status, errorText);
+            console.error("DeepSeek API 错误:", response.status);
             return null;
         }
         
         const data = await response.json();
         let text = data.choices[0].message.content.trim();
-        // 移除可能多余的引号
-        text = text.replace(/^["']|["']$/g, '');
-        return text;
-    } catch (e) {
+        
+        let thought = "";
+        let spoken = "";
+        
+        const thoughtMatch = text.match(/【(.*?)】/s);
+        const spokenMatch = text.match(/「(.*?)」/s);
+
+        if(thoughtMatch) thought = thoughtMatch[1];
+        if(spokenMatch) spoken = spokenMatch[1];
+
+// 过滤掉 AI 错误输出的占位符文字
+        if(thought && (thought.includes("潜台词") || thought.includes("说出的话") || thought.includes("内心想法") || thought.length < 5)){
+    thought = "";
+}
+        if(spoken && (spoken.includes("潜台词") || spoken.includes("说出的话") || spoken === "说出的话")){
+    spoken = "";
+}
+        
+        if(!spoken && !thought){
+            spoken = text.replace(/^["']|["']$/g, '');
+        }
+        
+        if(spoken){
+            speaker.recentDialogue.unshift(spoken);
+            if(speaker.recentDialogue.length > 5) speaker.recentDialogue.pop();
+        }
+        
+        if(thought){
+            addStory(`🤔 ${speaker.name} 心中暗想：${thought}`, [speaker.id]);
+            await sleep(300);
+        }
+        
+        return spoken;
+        
+    } catch(e) {
         console.error("AI 对话生成失败:", e);
         return null;
     }
@@ -958,52 +1203,109 @@ async function nextMonth(){
 // 皇帝操作
 function emperorAction(f, action){
     if(!f.isAlive) return;
+    
     if(action === 'favor'){
         if(!isActive(f)){ addStory(`⚠️ ${f.name} 正在禁足/冷宫中，无法召幸。`, [f.id]); return; }
         let gain = getFavorGain(f.favor);
         f.favor = Math.min(100, f.favor+gain);
         addStory(`👑 召幸 ${f.name}，圣宠+${gain}。`,[f.id]);
         if(Math.random()<0.05) startPregnancy(f);
-        let jealous = concubines.find(c=>isActive(c) && c.id!==f.id && Math.random()<0.5);
-        if(jealous){ jealous.relationships[f.id]=(jealous.relationships[f.id]||0)-6; addStory(`😤 ${jealous.name} 嫉妒 ${f.name}，关系恶化。`,[jealous.id,f.id]); }
+        
+        // 记录本月召幸次数
+        if(f.lastFavorMonth !== month){
+            f.recentFavors = 1;
+            f.lastFavorMonth = month;
+        } else {
+            f.recentFavors++;
+        }
+        
+        // 只有本月召幸次数 >= 2 才触发嫉妒
+        if(f.recentFavors >= 2){
+            let jealous = concubines.find(c => isActive(c) && c.id !== f.id && Math.random() < 0.5);
+            if(jealous){ 
+                addRelationship(jealous, f, -3);
+                // 可选：取消注释下面这行可以显示嫉妒日志
+                // addStory(`😤 ${jealous.name} 嫉妒 ${f.name}，关系恶化。`, [jealous.id, f.id]);
+            }
+        }
+        
         tryPromote(f);
     }
-    else if(action==='gift'){
+    else if(action === 'gift'){
         if(!isActive(f)){ addStory(`⚠️ ${f.name} 正在禁足/冷宫中，无法接受赏赐。`, [f.id]); return; }
         let gain = f.favor<=30?3+Math.floor(Math.random()*3) : (f.favor<=60?2+Math.floor(Math.random()*3) : (f.favor<=80?1+Math.floor(Math.random()*3) : 0+Math.floor(Math.random()*2)));
         f.favor = Math.min(100, f.favor+gain);
         addStory(`🎁 赏赐 ${f.name}，圣宠+${gain}。`,[f.id]);
+        
+        // 记录本月赏赐次数（与召幸共享计数器）
+        if(f.lastFavorMonth !== month){
+            f.recentFavors = 1;
+            f.lastFavorMonth = month;
+        } else {
+            f.recentFavors++;
+        }
+        
+        // 只有本月宠幸（召幸+赏赐）次数 >= 2 才触发嫉妒
+        if(f.recentFavors >= 2){
+            let jealous = concubines.find(c => isActive(c) && c.id !== f.id && Math.random() < 0.5);
+            if(jealous){ 
+                addRelationship(jealous, f, -2);
+            }
+        }
+        
         tryPromote(f);
     }
-    else if(action==='demote'){ let loss=8+Math.floor(Math.random()*10); f.favor=Math.max(0,f.favor-loss); addStory(`📉 贬斥 ${f.name}，圣宠-${loss}。`,[f.id]); if(f.favor<20) demote(f,"失宠"); }
-    else if(action==='poison'){
+    else if(action === 'demote'){ 
+        let loss=8+Math.floor(Math.random()*10); 
+        f.favor=Math.max(0,f.favor-loss); 
+        addStory(`📉 贬斥 ${f.name}，圣宠-${loss}。`,[f.id]); 
+        if(f.favor<20) demote(f,"失宠"); 
+    }
+    else if(action === 'poison'){
         if(!isActive(f)){ addStory(`⚠️ ${f.name} 正在禁足/冷宫中，无法赐毒。`, [f.id]); return; }
         let dmg = 15+Math.floor(Math.random()*21);
         f.health -= dmg;
         addStory(`☠️ 皇上赐毒 ${f.name}，健康-${dmg}！`,[f.id]);
         if(f.health<=0) killCharacter(f, true, "被赐毒");
     }
-    else if(action==='confine'){ if(f.status==="active") setStatus(f, "confined", 6); else addStory(`⚠️ ${f.name} 当前状态无法禁足。`, [f.id]); }
-    else if(action==='cold'){ if(f.status==="active") setStatus(f, "cold_palace"); else addStory(`⚠️ ${f.name} 当前状态无法打入冷宫。`, [f.id]); }
-    else if(action==='release'){ if(f.status!=="active") setStatus(f, "active"); else addStory(`⚠️ ${f.name} 已是自由身。`, [f.id]); }
-    else if(action==='promote'){
-        let idx=getRankIndex(f.rank);
-        if(idx===0){ addStory(`⚠️ ${f.name} 已是皇后，无法再升。`, [f.id]); return; }
-        let newRank=getRankByIndex(idx-1);
-        if((newRank==="皇后" && concubines.some(c=>c.rank==="皇后")) || (newRank==="皇贵妃" && concubines.some(c=>c.rank==="皇贵妃"))){
-            addStory(`⚠️ ${newRank} 位已有其人，无法晋升。`, [f.id]); return;
+    else if(action === 'confine'){ 
+        if(f.status === "active") setStatus(f, "confined", 6); 
+        else addStory(`⚠️ ${f.name} 当前状态无法禁足。`, [f.id]); 
+    }
+    else if(action === 'cold'){ 
+        if(f.status === "active") setStatus(f, "cold_palace"); 
+        else addStory(`⚠️ ${f.name} 当前状态无法打入冷宫。`, [f.id]); 
+    }
+    else if(action === 'release'){ 
+        if(f.status !== "active") setStatus(f, "active"); 
+        else addStory(`⚠️ ${f.name} 已是自由身。`, [f.id]); 
+    }
+    else if(action === 'promote'){
+        let idx = getRankIndex(f.rank);
+        if(idx === 0){ 
+            addStory(`⚠️ ${f.name} 已是皇后，无法再升。`, [f.id]); 
+            return; 
         }
-        let oldRank=f.rank;
-        f.rank=newRank;
+        let newRank = getRankByIndex(idx-1);
+        if((newRank === "皇后" && concubines.some(c=>c.rank === "皇后")) || 
+           (newRank === "皇贵妃" && concubines.some(c=>c.rank === "皇贵妃"))){
+            addStory(`⚠️ ${newRank} 位已有其人，无法晋升。`, [f.id]); 
+            return;
+        }
+        let oldRank = f.rank;
+        f.rank = newRank;
         addStory(`⬆️ 皇上晋 ${f.name} 为 ${newRank}！`, [f.id]);
         f.favor = Math.min(100, f.favor+3);
     }
-    else if(action==='demoteRank'){
-        let idx=getRankIndex(f.rank);
-        if(idx>=RANKS.length-1){ addStory(`⚠️ ${f.name} 已是答应，无法再降。`, [f.id]); return; }
-        let newRank=getRankByIndex(idx+1);
-        let oldRank=f.rank;
-        f.rank=newRank;
+    else if(action === 'demoteRank'){
+        let idx = getRankIndex(f.rank);
+        if(idx >= RANKS.length-1){ 
+            addStory(`⚠️ ${f.name} 已是答应，无法再降。`, [f.id]); 
+            return; 
+        }
+        let newRank = getRankByIndex(idx+1);
+        let oldRank = f.rank;
+        f.rank = newRank;
         addStory(`⬇️ 皇上降 ${f.name} 为 ${newRank}。`, [f.id]);
         f.favor = Math.max(0, f.favor-5);
     }
@@ -1200,7 +1502,7 @@ function showStartEditor(){
             let newF = {...cfg, id:nextConcubineId++, relationships, childrenIds:[], pregnancy:null, isAlive:true, status:"active", statusEndYear:0, statusEndMonth:0, timeline:[], lastPromoteYear:0, lastRecommendYear:-99, relatives:cfg.relatives||[], deathInfo:null, lowFavorMonths:0, zeroFavorMonths:0, hasSuperFavor:false};
             concubines.push(newF);
         }
-        for(let f of concubines) for(let other of concubines) if(f.id!==other.id && f.relationships[other.id]===undefined) f.relationships[other.id]=Math.floor(Math.random()*80)-40;
+        for(let f of concubines) for(let other of concubines) if(f.id!==other.id && f.relationships[other.id]===undefined) setRelationship(f, other, Math.floor(Math.random()*80)-40);
         modal.remove();
         renderGame();
         addStory("🌟 后宫新篇开启，圣上临朝。");
