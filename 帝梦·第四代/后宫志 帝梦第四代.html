@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>帝梦·后宫志</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #080604;
+  --gold: #c9a444;
+  --gold-dim: #7a6128;
+  --crimson: #8b1515;
+  --crimson-dim: #4a0d0d;
+  --jade: #2d6b4a;
+  --text: #d4b896;
+  --text-dim: #7a6848;
+  --card-bg: #110d09;
+  --border: rgba(201,164,68,0.18);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font-family:'Noto Serif SC',serif;min-height:100vh;
+  background-image:radial-gradient(ellipse at 50% 0%,rgba(139,21,21,0.07) 0%,transparent 55%)}
+
+/* ── Header ── */
+header{text-align:center;padding:2.5rem 1rem 1.5rem;border-bottom:1px solid var(--border);position:relative}
+h1{font-size:2rem;font-weight:300;letter-spacing:.5em;color:var(--gold);text-shadow:0 0 40px rgba(201,164,68,.25)}
+.subtitle{font-size:.7rem;letter-spacing:.3em;color:var(--text-dim);margin-top:.4rem}
+
+/* ── Nav ── */
+nav{display:flex;justify-content:center;border-bottom:1px solid var(--border)}
+.tab{padding:.75rem 2.2rem;cursor:pointer;font-size:.8rem;letter-spacing:.2em;color:var(--text-dim);
+  border:none;border-bottom:2px solid transparent;background:none;font-family:'Noto Serif SC',serif;transition:all .25s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* ── Views ── */
+.view{display:none;padding:1.8rem}
+.view.active{display:block}
+
+/* ── Filter ── */
+.filter-bar{display:flex;gap:.5rem;flex-wrap:wrap;max-width:1200px;margin:0 auto 1.4rem}
+.filter-btn{font-size:.62rem;padding:.25rem .7rem;border:1px solid var(--border);background:none;
+  color:var(--text-dim);cursor:pointer;letter-spacing:.1em;font-family:'Noto Serif SC',serif;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{border-color:var(--gold-dim);color:var(--gold)}
+
+/* ── Cards ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:1.1rem;max-width:1200px;margin:0 auto}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:2px;padding:1.3rem;cursor:pointer;
+  transition:all .25s;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--crimson),transparent);opacity:0;transition:opacity .3s}
+.card:hover{border-color:rgba(201,164,68,.35);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.card:hover::before{opacity:1}
+.card-name{font-size:1.1rem;font-weight:500;color:var(--gold);letter-spacing:.1em;margin-bottom:.15rem}
+.card-sub{font-size:.68rem;color:var(--text-dim);letter-spacing:.12em;margin-bottom:.6rem}
+.death-badge{display:inline-block;font-size:.58rem;padding:.12rem .45rem;letter-spacing:.1em;margin-bottom:.65rem}
+.death-murdered{background:rgba(139,21,21,.25);color:#c97070;border:1px solid rgba(139,21,21,.45)}
+.death-executed{background:rgba(80,40,0,.25);color:#c9a070;border:1px solid rgba(139,80,0,.45)}
+.death-natural{background:rgba(20,60,40,.25);color:#70c9a0;border:1px solid rgba(20,100,60,.45)}
+.death-childbirth{background:rgba(40,40,80,.25);color:#9090c9;border:1px solid rgba(40,40,120,.45)}
+.card-bars{display:flex;gap:.8rem;margin-bottom:.7rem}
+.bar-group{flex:1;text-align:center}
+.bar-label{font-size:.52rem;color:var(--text-dim);letter-spacing:.08em;display:block;margin-bottom:.2rem}
+.bar-track{height:2px;background:rgba(255,255,255,.05);border-radius:1px;overflow:hidden;margin-bottom:.15rem}
+.bar-fill{height:100%;border-radius:1px}
+.bar-fill.fv{background:var(--crimson)}
+.bar-fill.af{background:var(--jade)}
+.bar-val{font-size:.58rem;color:var(--text-dim)}
+.fate-row{margin-bottom:.6rem}
+.fate-tag{display:inline-block;font-size:.56rem;border:1px solid rgba(201,164,68,.15);
+  padding:.03rem .28rem;margin:.08rem;color:var(--gold-dim)}
+.card-lines{margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);
+  font-size:.62rem;color:var(--text-dim);line-height:1.85;white-space:pre-line;letter-spacing:.05em}
+
+/* ── 图片 ── */
+.card-img-wrap{width:100%;aspect-ratio:2/3;overflow:hidden;margin-bottom:.9rem;position:relative;
+  border:1px solid var(--border);background:#0c0906}
+.card-img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;
+  transition:transform .4s ease}
+.card:hover .card-img{transform:scale(1.04)}
+.card-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:2rem;color:var(--gold-dim);letter-spacing:.1em;font-weight:300;
+  background:linear-gradient(180deg,rgba(201,164,68,.06) 0%,rgba(0,0,0,.2) 100%)}
+/* 卡片图片底部渐变遮罩 */
+.card-img-wrap::after{content:'';position:absolute;bottom:0;left:0;right:0;height:35%;
+  background:linear-gradient(0deg,var(--card-bg) 0%,transparent 100%);pointer-events:none}
+
+/* Modal 顶部 flex 布局 */
+.modal-top{display:flex;gap:1.4rem;margin-bottom:1.3rem;padding-bottom:1.3rem;
+  border-bottom:1px solid var(--border)}
+.modal-img-wrap{width:120px;flex-shrink:0;aspect-ratio:2/3;overflow:hidden;
+  border:1px solid var(--border);background:#0c0906;align-self:flex-start}
+.modal-img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.modal-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;color:var(--gold-dim);font-weight:300}
+.modal-top-info{flex:1;min-width:0}
+
+/* ── Timeline ── */
+.tl-wrap{overflow-x:auto;padding-bottom:1rem}
+.tl-inner{min-width:860px;padding:.5rem 1rem}
+.tl-axis{display:flex;padding-left:82px;border-bottom:1px solid var(--border);margin-bottom:1.6rem;padding-bottom:.4rem}
+.yr{flex:1;text-align:center;font-size:.58rem;color:var(--text-dim);letter-spacing:.05em;position:relative}
+.yr::before{content:'';position:absolute;bottom:-.4rem;left:50%;width:1px;height:5px;background:var(--border)}
+.tl-rows{display:flex;flex-direction:column;gap:.4rem}
+.tl-row{display:flex;align-items:center;height:26px;cursor:pointer}
+.tl-row:hover .tl-bar{opacity:1}
+.tl-lbl{width:82px;font-size:.66rem;color:var(--text-dim);text-align:right;padding-right:.7rem;flex-shrink:0}
+.tl-track{flex:1;position:relative;height:100%}
+.tl-bar{position:absolute;height:9px;top:50%;transform:translateY(-50%);border-radius:1px;opacity:.65;transition:opacity .2s}
+.tl-bar.murdered{background:linear-gradient(90deg,var(--crimson-dim),var(--crimson))}
+.tl-bar.executed{background:linear-gradient(90deg,#4a2800,#8b5200)}
+.tl-bar.natural{background:linear-gradient(90deg,#1a4030,var(--jade))}
+.tl-bar.childbirth{background:linear-gradient(90deg,#1a1a50,#3a3a8b)}
+.tl-dot-s{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--gold-dim);top:50%;transform:translateY(-50%)}
+.tl-dot-e{position:absolute;width:7px;height:7px;border-radius:50%;top:50%;transform:translateY(-50%)}
+.tl-dot-e.murdered{background:var(--crimson);box-shadow:0 0 5px var(--crimson)}
+.tl-dot-e.executed{background:#8b5200}
+.tl-dot-e.natural{background:var(--jade)}
+.tl-dot-e.childbirth{background:#5050c9}
+.legend{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:1.4rem;max-width:860px;margin-left:auto;margin-right:auto}
+.leg-item{display:flex;align-items:center;gap:.35rem;font-size:.62rem;color:var(--text-dim)}
+.leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ── Network ── */
+#net-canvas{display:block;width:100%;max-width:900px;margin:0 auto;cursor:default}
+.net-legend{display:flex;gap:1.2rem;justify-content:center;margin-top:.8rem;flex-wrap:wrap}
+.net-leg-item{display:flex;align-items:center;gap:.35rem;font-size:.62rem;color:var(--text-dim)}
+.net-leg-line{width:22px;height:2px}
+
+/* ── Modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100;overflow-y:auto;padding:2rem}
+.modal-overlay.active{display:flex;align-items:flex-start;justify-content:center}
+.modal{background:var(--card-bg);border:1px solid var(--border);max-width:660px;width:100%;
+  padding:2.2rem;position:relative;border-radius:2px;margin:auto}
+.modal::before{content:'';position:absolute;top:0;left:2rem;right:2rem;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.modal-x{position:absolute;top:.9rem;right:1.1rem;background:none;border:none;
+  color:var(--text-dim);font-size:1.1rem;cursor:pointer;font-family:'Noto Serif SC',serif;transition:color .2s}
+.modal-x:hover{color:var(--gold)}
+.modal-name{font-size:1.5rem;font-weight:300;color:var(--gold);letter-spacing:.3em;margin-bottom:.25rem}
+.modal-meta{font-size:.72rem;color:var(--text-dim);letter-spacing:.15em;margin-bottom:1.3rem}
+.modal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-bottom:1.3rem;
+  padding-bottom:1.3rem;border-bottom:1px solid var(--border)}
+.m-stat{text-align:center;padding:.5rem;background:rgba(255,255,255,.02);border:1px solid var(--border)}
+.m-stat-l{font-size:.5rem;color:var(--text-dim);letter-spacing:.15em;display:block;margin-bottom:.25rem}
+.m-stat-v{font-size:.88rem;color:var(--text)}
+.modal-bio{font-size:.82rem;line-height:2.05;color:var(--text);white-space:pre-wrap;margin-bottom:1.3rem}
+.modal-jd{padding:.9rem;border-left:2px solid var(--gold-dim);background:rgba(201,164,68,.04);
+  /* 传记内联人名跳转 */
+.bio-link{color:var(--gold);cursor:pointer;border-bottom:1px solid rgba(201,164,68,.3);
+  transition:border-color .2s,color .2s}
+.bio-link:hover{color:#e8c870;border-bottom-color:var(--gold)}
+  font-size:.76rem;line-height:2.2;color:var(--text-dim);white-space:pre-line;letter-spacing:.05em}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>帝　梦　·　后　宫　志</h1>
+  <p class="subtitle">逸康年间　后妃档案</p>
+</header>
+
+<nav>
+  <button class="tab active" onclick="switchView('cards',this)">人 物 览</button>
+  <button class="tab" onclick="switchView('timeline',this)">时 间 轴</button>
+  <button class="tab" onclick="switchView('network',this)">关 系 图</button>
+</nav>
+
+<div id="view-cards" class="view active">
+  <div class="filter-bar" id="filter-bar"></div>
+  <div class="cards-grid" id="cards-grid"></div>
+</div>
+
+<div id="view-timeline" class="view">
+  <div class="legend" id="tl-legend"></div>
+  <div class="tl-wrap"><div class="tl-inner" id="tl-inner"></div></div>
+</div>
+
+<div id="view-network" class="view">
+  <canvas id="net-canvas" height="540"></canvas>
+  <div class="net-legend">
+    <div class="net-leg-item"><div class="net-leg-line" style="background:#8b1515"></div>致死</div>
+    <div class="net-leg-item"><div class="net-leg-line" style="background:rgba(139,80,0,.8)"></div>加害</div>
+    <div class="net-leg-item"><div class="net-leg-line" style="background:#2d6b4a"></div>交好</div>
+    <div class="net-leg-item"><div class="net-leg-line" style="background:rgba(201,164,68,.4)"></div>族亲</div>
+  </div>
+</div>
+
+  <div class="modal-overlay" id="modal" onclick="modalBgClick(event)">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <div class="modal-top">
+      <div class="modal-img-wrap" id="m-img-wrap">
+        <div class="modal-ph" id="m-ph">？</div>
+      </div>
+      <div class="modal-top-info">
+        <div class="modal-name" id="m-name"></div>
+        <div class="modal-meta" id="m-meta"></div>
+        <div class="modal-grid" id="m-grid"></div>
+      </div>
+    </div>
+    <div class="modal-bio" id="m-bio"></div>
+    <div class="modal-jd" id="m-jd"></div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   ██████╗  █████╗ ████████╗ █████╗
+   ██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗
+   ██║  ██║███████║   ██║   ███████║
+   ██║  ██║██╔══██║   ██║   ██╔══██║
+   ██████╔╝██║  ██║   ██║   ██║  ██║
+   ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+
+  【填写说明】
+  只需修改下方两个数组：
+
+  1. others[]  — 非妃嫔节点（凶手、帝等），一般不用动
+  2. concubines[] — 每位妃子一条记录，字段含义见模板注释
+
+  【字段说明】
+  id          唯一标识，建议拼音，如 "yan_qing_yuan"
+  name        姓名
+  title       封号，无则 ""
+  rank        最终位分
+  age         死亡时年龄
+  origin      出身
+  specialty   擅长，无则 ""
+  entryYear   逸康X年入宫（纯数字）
+  deathYear   逸康X年去世（纯数字）
+  favor       宠爱值
+  affection   好感值（她对帝的感情）
+  fate        命格数组，如 ["强健","仁爱"]，无则 []
+  deathType   "murdered"被害 / "executed"赐死 / "natural"自然 / "childbirth"难产
+  killer      直接凶手姓名，无则 ""
+  sons        皇子总数
+  survivingSons    现存皇子数
+  daughters        公主总数
+  survivingDaughters 现存公主数
+  enemies     厌恶的人，姓名数组
+  friends     交好的人，姓名数组
+  clan        同族妃嫔的 id 列表
+  harmedBy    她受到的伤害，[{ by:"姓名", type:"小产/染病/落水致死", year:X }]
+  harmed      她造成的伤害，[{ to:"姓名", type:"...", year:X }]
+  bio         小传全文，可先留 ""
+  judgment    判词，换行用 \n
+================================================================ */
+
+// ── 非妃嫔节点 ──────────────────────────────────────────────
+const others = [
+  { id:"emperor",    name:"帝",     type:"emperor"  },
+  { id:"yunxuanluo", name:"云玄珞", type:"villain"  },
+  { id:"shenwanhui", name:"沈菀惠", type:"villain"  },
+  { id:"mulaide",    name:"穆莱德", type:"villain"  },
+  { id:"wangyulan",  name:"王羽兰", type:"villain"  },
+];
+
+// ── 妃嫔数据 ────────────────────────────────────────────────
+const concubines = [
+
+  // ══════════════════════════════════════
+  // 燕清媛（完整示例，照此格式填写其余条目）
+  // ══════════════════════════════════════
+  {
+    id:"yan_qing_yuan", name:"燕清媛", title:"", rank:"嫔",
+    age:17, origin:"京畿小吏", specialty:"诗词",
+    entryYear:5, deathYear:7,
+    favor:448, affection:340,
+    fate:["强健","仁爱","利欲"],
+    deathType:"murdered", killer:"夏宁昭",
+    sons:0, survivingSons:0, daughters:0, survivingDaughters:0,
+    enemies:["夏宁昭"], friends:[], clan:[],
+    harmedBy:[
+      {by:"夏宁昭",type:"小产",year:6},
+      {by:"帝",    type:"赐药小产",year:7},
+      {by:"夏宁昭",type:"小产致死",year:7},
+    ],
+    harmed:[],
+    image:"images/燕清媛.png",        // 填入图片路径后此处会显示人物图，如 "images/燕清媛.jpg"
+    bio:
+`人物简介
+
+燕氏，出身京畿小吏之家，家族势力不显，然胜在天子脚下，并非全无见识。她性情温和，意志却畏缩，才智平平，容貌中人，唯擅诗词一项，算得上闺中薄才。道德亦无甚出奇，不过凡夫俗子之格局，心中藏着一点"荣华富贵"的野心，不大，却真实——这或许是她被带入宫后，咬牙撑住的隐秘动力。
+命格中"强健"二字，与她最终血崩离世的结局形成了深深的讽刺；"仁爱"则印证了她无争无怨的性情，在宫廷漩涡中从未主动出手害人，慈戒、记过皆为零；"利欲"与她对荣华的渴盼暗暗呼应——入了宫，总盼着能站稳。
+宫中两载，与夏宁昭结为死仇，非因一时口角，而是以血与子嗣为代价。
+
+---
+编年经历
+逸康五年三月初三，帝春日野游，燕氏偶入御驾视野，当日被带回后宫，封为答应，时年十五。她并非旁人引荐，亦非家族送入，只是一次春游的偶然。帝对她的最初垂顾，或许不过是那一日的心动，轻巧，却改变了她此后所有的命运走向。
+入宫后，宠幸颇为频繁。两年间，帝宠幸燕氏共十六次，年均八次，入宫年限虽短，宠爱值随之积累至四百余，置于两年这个时间框架内，实属持续受宠的节奏。帝对她确有真实的热度，三次有孕、六度晋封，皆可印证。
+入宫九月后，逸康五年十二月十六日，燕氏第一次有孕，因此晋封为常在。
+逸康六年六月初九，晋位美人，然同日意外小产——查明系宫人夏宁昭所为。腹中孩儿已有五六月，就这样没了。晋封与失子同日发生，喜与悲叠在一处，不知该以何种面目站在新的位分里。这一年，她十六岁。
+小产后五个月，逸康六年十一月初九，燕氏再次有孕，十一月十一日晋为贵人，十二月十一日再晋为小仪，一月之内连升两级。位分攀升之快，背后是帝王彼时仍在频繁宠幸她——而非情感的格外深厚。两次有孕、连续晋封，或许让她以为局面已在好转，以为肚中的孩子这回能留住。逸康七年正月初三，帝赐药令其小产。彼时腹中胎儿已诊出为女，宫中公主已多，帝未留。不足三月的身孕，以这样的理由散去。此时距上一次小产，不过半年。
+逸康七年五月初八，燕氏第三次有孕，翌日晋封为嫔。两年，从答应到嫔，六级位分，皆以怀孕为阶。这是她此生所能抵达的最高位分，也是她最后一次晋封。
+逸康七年八月初六，意外小产，系夏宁昭再度加害。两日后，八月初八，血崩，不治。
+
+---
+推测
+三度有孕，三度皆失，来路却各不相同：夏宁昭的手伸入其中两次，帝王自己动了一次。燕氏厌恶夏宁昭，这份恨是带血的，清晰的。至于帝赐药那一回，她大约说不清自己是什么感受——帝对她并非无情，宠幸从未断绝，晋封也从未吝啬，只是那个女胎，在权衡之下不值得留。她或许连恨都不知从何处落脚，只能咽下去。
+性情温和、意志畏缩的人，在宫廷中往往以诗词消磨时光，以沉默换取安宁，却无力自保，更无力反击。三次怀孕，三次失血，身体在一次次打击中被耗尽，最终血崩时，那个"强健"的命格，也再撑不住了。
+
+---
+结语
+逸康七年八月初八，燕清媛，年十七，以嫔位殁，无封号，无子嗣。入宫两载，三孕三失，皆归于尘。`,
+    judgment:
+`春游一遇帝垂青，入宫方知命若萍。
+三孕三失皆夏害，强健虚名血成腥。
+十七芳年嫔位殁，荣华梦断问幽冥。`,
+  },
+
+  // ══════════════════════════════════════
+  // 叶凝雁
+  // ══════════════════════════════════════
+  {
+    id:"ye_ning_yan", name:"叶凝雁", title:"", rank:"美人",
+    age:20, origin:"京畿绣工", specialty:"",
+    entryYear:7, deathYear:10,
+    favor:-199, affection:-418,
+    fate:["病弱","桃花","恶运"],
+    deathType:"executed", killer:"帝",
+    sons:1, survivingSons:1, daughters:0, survivingDaughters:0,
+    enemies:["云玄珞"], friends:[], clan:[],
+    harmedBy:[{by:"云玄珞",type:"染病",year:8}],
+    harmed:[],
+    image:"images/叶凝雁.png",
+    bio:
+    `人物简介
+
+叶氏，出身京畿绣工之家，家族势力微薄，入宫全凭一次偶然——逸康七年三月，帝春日野游，见她花容月貌，将其带回宫中。她性情活泼，意志勇敢坚定，野心却仅止于"平平安安"，不过想守住一方安稳。
+命格中三字——病弱、桃花、恶运——几乎将她的三年宫廷生涯写尽。
+交际一项"人见人厌"，评分极低，与她活泼的性情形成落差。或许是她的直率鲜活在深宫规矩中反而显得不合时宜，也或许是日后的秽乱之事，让她在宫人眼中彻底失了颜面。惩戒五次、记过六次，皆集中于最后一段时光，是宫廷对她最终的定性。
+宫中无交好之人，厌恶云玄珞。
+
+---
+编年经历
+逸康七年三月初三，叶氏入宫，封为答应，时年十七。
+入宫后帝对她并无持续深情，三年总计宠幸六次，年均两次，属稀少之列。然而帝曾言"三次侍寝便怀孕了"——好孕，是命格中桃花之力的另一种显现，生育力旺盛，身体对那一点情分，格外留得住。
+逸康八年四月初七，叶氏有孕，次日晋封为常在。六月初十，以"久侍宫廷"为由晋位美人——此时她已有孕三月，这一道晋封却与孕事无关，只是资历积累的结果，帝对她并无格外的情感投注。
+逸康八年七月初五，叶氏突染疾病，系宫人云玄珞所为。病弱命格至此应验，身体从此埋下隐患。
+逸康八年十二月初八，晋位贵人，彼时已是孕晚期。
+逸康九年正月初二，叶氏诞下皇子周允十常，同日晋封为小仪。她以花容月貌、好孕之身，一路以孕事撑起位分，此时登至小仪，似乎已算站稳了脚跟。
+然而桃花命格，终究没有善终。
+逸康十年正月初二，周允十常周岁之日，叶氏因私通外人，被降位为美人。此后两个月，秽乱后宫之事多次被发，屡遭记大过与杖责。身体本已因云玄珞一事留下底子，再经数番杖打，愈发难以支撑。
+逸康十年三月初三，叶氏病逝。这一天，正是她入宫整整三年。
+帝令将其弃于乱葬岗，不入皇陵，无封号，无哀荣。
+
+---
+推测
+帝对叶氏，从最初的春日一顾，到最终的深恶痛绝（宠爱-199，好感-418），情感经历了彻底的反转。私通之事，大约是压垮一切的那一击——帝可以对她情分不深，可以许久不召，却不能容忍她以此身另觅他人。
+叶氏野心不过平平安安，却偏生了一副桃花命，活泼的性情在宫中也许从未真正收敛过。是深宫的寂寞将她推向出轨，还是桃花命格本就如此难以自持，已无从知晓。她厌恶云玄珞，那场突如其来的疾病是宫中给她最早的警告，只是她大约没能从中学会更多自保。
+皇子周允十常现存，母亲以乱葬岗收场，他在宫中的处境，或许也因此蒙了一层阴翳。
+
+---
+结语
+
+逸康十年三月初三，叶凝雁，年二十，以美人位病逝，弃于乱葬岗，无封号，无子女随葬。入宫之日与殁日同为三月初三，三年整，一日不差。皇子周允十常，留于宫中。`,
+    judgment:
+`花颜月貌出微寒，春游一遇入帝关。
+三侍得孕好生育，桃花乱起祸无完。
+三年三月来复去，乱葬荒丘魂可安？`,
+  },
+
+  // ══════════════════════════════════════
+  // 杨旭嫣
+  // ══════════════════════════════════════
+  {
+    id:"yang_xu_yan", name:"杨旭嫣", title:"萄", rank:"婉仪",
+    age:27, origin:"晋地仕宦", specialty:"歌舞",
+    entryYear:2, deathYear:10,
+    favor:1350, affection:1050,
+    fate:[],
+    deathType:"murdered", killer:"云玄珞",
+    sons:0, survivingSons:0, daughters:1, survivingDaughters:1,
+    enemies:["云玄珞","夏宁昭"], friends:["夏韫冰"], clan:[],
+    harmedBy:[
+      {by:"夏宁昭",type:"小产",year:5},
+      {by:"帝",    type:"赐药小产",year:8},
+      {by:"云玄珞",type:"染病",year:9},
+      {by:"云玄珞",type:"小产致死",year:10},
+    ],
+    harmed:[],
+    image:"images/杨旭嫣.png",
+    bio:"",
+    judgment:
+`风华绝代帝心倒，
+萄封四孕三皆草。
+温柔面下藏蛇蝎，
+错信夏氏失子宝。
+云氏再害病难好，
+二七婉仪入尘道。`,
+  },
+
+  // ══════════════════════════════════════
+  // 夏宁昭
+  // ══════════════════════════════════════
+  {
+    id:"xia_ning_zhao", name:"夏宁昭", title:"", rank:"小仪",
+    age:32, origin:"陇地太守之女", specialty:"歌舞",
+    entryYear:3, deathYear:16,
+    favor:1805, affection:1569,
+    fate:["恶运","性灵"],
+    deathType:"murdered", killer:"云玄珞",
+    sons:0, survivingSons:0, daughters:0, survivingDaughters:0,
+    enemies:["云玄珞"], friends:[], clan:["xia_huan_mei"],
+    harmedBy:[
+      {by:"云玄珞",type:"小产",year:5},
+      {by:"云玄珞",type:"染病",year:7},
+      {by:"云玄珞",type:"落水致死",year:16},
+    ],
+    harmed:[
+      {to:"杨旭嫣",type:"小产",year:5},
+      {to:"燕清媛",type:"小产",year:6},
+      {to:"燕清媛",type:"小产致死",year:7},
+      {to:"沈怡巧",type:"染病",year:15},
+      {to:"法尔莱",type:"小产",year:15},
+    ],
+    bio:"",
+    judgment:
+`倾城绝色帝心惊，
+移天野心难自停。
+屡害六宫降又晋，
+子女尽失恶运应。
+佛寺五载情被唤，
+落水十三归幽冥。`,
+  },
+
+  // ══════════════════════════════════════
+  // 万俟薇莹
+  // ══════════════════════════════════════
+  {
+    id:"wansi_wei_ying", name:"万俟薇莹", title:"", rank:"美人",
+    age:20, origin:"京畿富农", specialty:"",
+    entryYear:13, deathYear:16,
+    favor:198, affection:140,
+    fate:["强健","孤星"],
+    deathType:"murdered", killer:"云玄珞",
+    sons:0, survivingSons:0, daughters:0, survivingDaughters:0,
+    enemies:[], friends:[], clan:[],
+    harmedBy:[{by:"云玄珞",type:"落水致死",year:16}],
+    harmed:[],
+    bio:"",
+    judgment:
+`农家美人志平宁，
+三载宫中身若萤。
+高德无争孤星命，
+云氏一手断芳龄。
+强健之身非病殒，
+无宠无孕无人铭。`,
+  },
+
+  // ══════════════════════════════════════
+  // 王婉蓁
+  // ══════════════════════════════════════
+  {
+    id:"wang_wan_zhen", name:"王婉蓁", title:"", rank:"美人",
+    age:20, origin:"京畿没落世家", specialty:"",
+    entryYear:14, deathYear:16,
+    favor:455, affection:372,
+    fate:["仁爱"],
+    deathType:"murdered", killer:"云玄珞",
+    sons:1, survivingSons:1, daughters:0, survivingDaughters:0,
+    enemies:[], friends:[], clan:["wang_yu_lan"],
+    harmedBy:[{by:"云玄珞",type:"落水致死",year:16}],
+    harmed:[],
+    bio:"",
+    judgment:
+`入宫因姐侍病难，
+两月宠妃誉非凡。
+仁善心肠胆亦烈，
+敢告皇后事骇然。
+产后月余云氏害，
+皇子留世问苍天。`,
+  },
+
+  // ══════════════════════════════════════
+  // 黎玄诗
+  // ══════════════════════════════════════
+  {
+    id:"li_xuan_shi", name:"黎玄诗", title:"", rank:"美人",
+    age:19, origin:"蜀地巨商", specialty:"武艺",
+    entryYear:15, deathYear:18,
+    favor:52, affection:74,
+    fate:["强健","桃花","利欲"],
+    deathType:"executed", killer:"帝",
+    sons:0, survivingSons:0, daughters:0, survivingDaughters:0,
+    enemies:["王羽兰"], friends:[], clan:[],
+    harmedBy:[{by:"王羽兰",type:"小产",year:17}],
+    harmed:[],
+    bio:"",
+    judgment:
+`清新入宫帝初倾，
+渐冷无情归沉冥。
+桃花命里难自守，
+秽乱被发赐死令。
+乱葬荒岗无人问，
+利欲荣华尽成零。`,
+  },
+
+  // ══════════════════════════════════════
+  // 麦希
+  // ══════════════════════════════════════
+  {
+    id:"mai_xi", name:"麦希", title:"", rank:"贵人",
+    age:25, origin:"胡地贡", specialty:"歌舞",
+    entryYear:11, deathYear:18,
+    favor:605, affection:546,
+    fate:["病弱"],
+    deathType:"murdered", killer:"云玄珞",
+    sons:0, survivingSons:0, daughters:0, survivingDaughters:0,
+    enemies:["穆莱德"], friends:[], clan:[],
+    harmedBy:[
+      {by:"穆莱德",type:"小产",year:14},
+      {by:"穆莱德",type:"小产",year:14},
+      {by:"云玄珞",type:"落水致死",year:18},
+    ],
+    harmed:[],
+    bio:"",
+    judgment:
+`异邦贡入帝宫庭，
+七载孤身命若萍。
+两孕两失穆氏手，
+病弱之躯难撑命。
+公主夭折泪未干，
+云氏落水断芳龄。`,
+  },
+
+  // ══════════════════════════════════════
+  // 法尔莱
+  // ══════════════════════════════════════
+  {
+    id:"fa_er_lai", name:"法尔莱", title:"", rank:"常在",
+    age:21, origin:"夷地贡", specialty:"",
+    entryYear:12, deathYear:18,
+    favor:361, affection:346,
+    fate:["仁爱"],
+    deathType:"murdered", killer:"云玄珞",
+    sons:0, survivingSons:0, daughters:0, survivingDaughters:0,
+    enemies:["云玄珞","夏宁昭"], friends:[], clan:[],
+    harmedBy:[
+      {by:"夏宁昭",type:"小产",year:15},
+      {by:"云玄珞",type:"染病",year:16},
+      {by:"云玄珞",type:"落水致死",year:18},
+    ],
+    harmed:[],
+    bio:"",
+    judgment:
+`贡入深宫志移天，
+六载常在梦难圆。
+两日孕胎夏氏夺，
+云氏两害断华年。
+仁爱命中藏烈火，
+落水归冥恨绵绵。`,
+  },
+
+  // ══════════════════════════════════════
+  // 麦尼修
+  // ══════════════════════════════════════
+  {
+    id:"mai_ni_xiu", name:"麦尼修", title:"", rank:"常在",
+    age:20, origin:"倭地贡", specialty:"刺绣",
+    entryYear:16, deathYear:19,
+    favor:218, affection:173,
+    fate:["病弱","仁爱"],
+    deathType:"murdered", killer:"沈菀惠",
+    sons:0, survivingSons:0, daughters:0, survivingDaughters:0,
+    enemies:["沈菀惠","云玄珞"], friends:[], clan:[],
+    harmedBy:[
+      {by:"云玄珞",type:"染病",year:17},
+      {by:"沈菀惠",type:"小产致死",year:19},
+    ],
+    harmed:[],
+    bio:"",
+    judgment:
+`倭地贡来帝初倾，
+冷淡顺受命如萍。
+病弱云氏染疾早，
+五月孕失沈氏凌。
+血崩一夜芳年尽，
+荣华未沾入幽冥。`,
+  },
+
+  // ══════════════════════════════════════
+  // 黎则曦
+  // ══════════════════════════════════════
+  {
+    id:"li_ze_xi", name:"黎则曦", title:"", rank:"婕妤",
+    age:32, origin:"齐地庄主", specialty:"武艺",
+    entryYear:3, deathYear:19,
+    favor:924, affection:790,
+    fate:[],
+    deathType:"murdered", killer:"沈菀惠",
+    sons:0, survivingSons:0, daughters:0, survivingDaughters:0,
+    enemies:["云玄珞"], friends:[], clan:[],
+    harmedBy:[
+      {by:"云玄珞",type:"染病",year:17},
+      {by:"沈菀惠",type:"落水致死",year:19},
+    ],
+    harmed:[],
+    bio:"",
+    judgment:
+`一见入宫帝倾倒，
+十六载功全凭老。
+云氏染疾身已弱，
+初孕落水遭沈讨。
+强势十六无子嗣，
+归冥清誉无人悼。`,
+  },
+
+  // ══════════════════════════════════════
+  // 完颜昭媚
+  // ══════════════════════════════════════
+  {
+    id:"wanyan_zhao_mei", name:"完颜昭媚", title:"媚", rank:"常在",
+    age:21, origin:"京畿宫人", specialty:"",
+    entryYear:17, deathYear:19,
+    favor:832, affection:706,
+    fate:["恶运"],
+    deathType:"murdered", killer:"云玄珞",
+    sons:0, survivingSons:0, daughters:0, survivingDaughters:0,
+    enemies:["云玄珞"], friends:[], clan:[],
+    harmedBy:[{by:"云玄珞",type:"落水致死",year:19}],
+    harmed:[],
+    bio:"",
+    judgment:
+`宫婢升妃帝心欢，
+四季宠妃冠后班。
+高德恶运相悖行，
+云氏旧主落水寒。
+盼子未成身早殁，
+媚封一梦付烟岚。`,
+  },
+
+  // ══════════════════════════════════════
+  // 沈怡巧
+  // ══════════════════════════════════════
+  {
+    id:"shen_yi_qiao", name:"沈怡巧", title:"", rank:"妃",
+    age:37, origin:"豫地仕宦", specialty:"乐器",
+    entryYear:1, deathYear:19,
+    favor:2378, affection:1856,
+    fate:[],
+    deathType:"childbirth", killer:"",
+    sons:2, survivingSons:2, daughters:1, survivingDaughters:1,
+    enemies:["穆莱德","夏宁昭"], friends:["苏思珞"], clan:[],
+    harmedBy:[
+      {by:"夏宁昭",type:"染病",year:15},
+      {by:"帝",    type:"赐药小产",year:16},
+      {by:"穆莱德",type:"染病",year:18},
+    ],
+    harmed:[],
+    bio:"",
+    judgment:
+`明媚活泼帝倾重，
+十八盛宠最深浓。
+假孕受过百折起，
+四孕艰辛攀妃峰。
+产日妃日亦殁日，
+廿八皇子望长空。`,
+  },
+
+  /*
+  ══════════════════════════════════════
+  【空白模板】新增妃子时复制此块
+  ══════════════════════════════════════
+  {
+    id:"",           // 唯一 id，拼音
+    name:"",
+    title:"",        // 封号，无则 ""
+    rank:"",         // 最终位分
+    age:0,
+    origin:"",
+    specialty:"",
+    entryYear:0,
+    deathYear:0,
+    favor:0,
+    affection:0,
+    fate:[],         // 命格，如 ["强健","仁爱"]
+    deathType:"",    // murdered / executed / natural / childbirth
+    killer:"",       // 无则 ""
+    sons:0, survivingSons:0,
+    daughters:0, survivingDaughters:0,
+    enemies:[],
+    friends:[],
+    clan:[],         // 同族妃嫔 id
+    harmedBy:[],     // { by:"姓名", type:"小产/染病/落水致死", year:X }
+    harmed:[],       // { to:"姓名", type:"...", year:X }
+    image:"",        // 图片路径，如 "images/某某.jpg"，无图则留 ""
+    bio:``,
+    judgment:``,
+  },
+  */
+
+]; // ← concubines 结束
+
+// ================================================================
+// 渲染逻辑（一般不需要修改）
+// ================================================================
+
+const YEAR_MIN = 1, YEAR_MAX = 20;
+const YEARS = Array.from({length: YEAR_MAX - YEAR_MIN + 1}, (_,i) => i + YEAR_MIN);
+
+const DEATH_LABEL = {murdered:"被害", executed:"赐死", natural:"自然/病逝", childbirth:"难产"};
+const DEATH_COLOR = {murdered:"#8b1515", executed:"#8b5200", natural:"#2d6b4a", childbirth:"#5050c9"};
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function pct(v,max){return clamp((v/max)*100,0,100)}
+
+// ── 卡片视图 ──────────────────────────────────────────────────
+let currentFilter = null;
+function renderCards(){
+  const list = currentFilter ? concubines.filter(c=>c.deathType===currentFilter) : concubines;
+  document.getElementById("cards-grid").innerHTML = list.map(c=>`
+    <div class="card" onclick="openModal('${c.id}')">
+      <div class="card-img-wrap">
+        ${c.image
+          ? `<img class="card-img" src="${c.image}" alt="${c.name}" onerror="this.outerHTML='<div class=card-ph>${c.name[0]}</div>'">`
+          : `<div class="card-ph">${c.name[0]}</div>`}
+      </div>
+      <div class="card-name">${c.name}${c.title?`<span style="font-size:.7em;margin-left:.25em;color:var(--gold-dim)">·${c.title}</span>`:""}</div>
+      <div class="card-sub">逸康${c.entryYear}年入宫　${c.rank}位殁　享年${c.age}岁</div>
+      <div class="death-badge death-${c.deathType}">${DEATH_LABEL[c.deathType]}${c.killer?"　"+c.killer:""}</div>
+      <div class="card-bars">
+        <div class="bar-group">
+          <span class="bar-label">宠　爱</span>
+          <div class="bar-track"><div class="bar-fill fv" style="width:${pct(Math.max(0,c.favor),3000)}%;background:${c.favor<0?"#4a0d0d":c.favor<500?"#4a3a2a":c.favor<1500?"var(--gold-dim)":"var(--gold)"}"></div></div>
+          <span class="bar-val">${c.favor}</span>
+        </div>
+        <div class="bar-group">
+          <span class="bar-label">好　感</span>
+          <div class="bar-track"><div class="bar-fill af" style="width:${pct(Math.max(0,c.affection),3000)}%"></div></div>
+          <span class="bar-val">${c.affection}</span>
+        </div>
+      </div>
+      ${c.fate.length?`<div class="fate-row">${c.fate.map(f=>`<span class="fate-tag">${f}</span>`).join("")}</div>`:""}
+      ${c.judgment?`<div class="card-lines">${c.judgment.split("\n").slice(0,2).join("\n")} …</div>`:""}
+    </div>`).join("");
+}
+
+function renderFilterBar(){
+  const btns=[["all","全部"],["murdered","被害"],["executed","赐死"],["natural","自然"],["childbirth","难产"]];
+  document.getElementById("filter-bar").innerHTML=btns.map(([v,l])=>
+    `<button class="filter-btn${v==="all"?" active":""}" onclick="setFilter('${v}',this)">${l}</button>`).join("");
+}
+
+function setFilter(v,btn){
+  document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  currentFilter = v==="all"?null:v;
+  renderCards();
+}
+
+// ── 时间轴 ────────────────────────────────────────────────────
+let tlDone=false;
+function renderTimeline(){
+  if(tlDone)return; tlDone=true;
+  const inner=document.getElementById("tl-inner");
+  const total=YEAR_MAX-YEAR_MIN+1;
+  const axis=`<div class="tl-axis">${YEARS.map(y=>`<div class="yr">逸康${y}</div>`).join("")}</div>`;
+  const rows=concubines.map(c=>{
+    const s=((c.entryYear-YEAR_MIN)/total)*100;
+    const e=((c.deathYear-YEAR_MIN)/total)*100;
+    const w=Math.max(e-s,.4);
+    return `<div class="tl-row" onclick="openModal('${c.id}')">
+      <div class="tl-lbl">${c.name}</div>
+      <div class="tl-track">
+        <div class="tl-bar ${c.deathType}" style="left:${s}%;width:${w}%"></div>
+        <div class="tl-dot-s" style="left:${s}%"></div>
+        <div class="tl-dot-e ${c.deathType}" style="left:${e}%"></div>
+      </div></div>`;
+  }).join("");
+  inner.innerHTML=axis+`<div class="tl-rows">${rows}</div>`;
+
+  document.getElementById("tl-legend").innerHTML=
+    Object.entries(DEATH_LABEL).map(([k,v])=>
+      `<div class="leg-item"><div class="leg-dot" style="background:${DEATH_COLOR[k]}"></div>${v}</div>`).join("");
+}
+
+// ── 关系图（Canvas） ──────────────────────────────────────────
+let netDone=false;
+function renderNetwork(){
+  if(netDone)return; netDone=true;
+  const canvas=document.getElementById("net-canvas");
+  const W=canvas.offsetWidth; canvas.width=W;
+  const H=540; const ctx=canvas.getContext("2d");
+
+  // 构建节点
+  const nodeList=[
+    ...concubines.map(c=>({id:c.name,type:"concubine",dt:c.deathType})),
+    ...others.map(o=>({id:o.name,type:o.type})),
+  ];
+  const seen=new Set();
+  const nodes=nodeList.filter(n=>{if(seen.has(n.id))return false;seen.add(n.id);return true;});
+
+  // 构建边
+  const edges=[];
+  concubines.forEach(c=>{
+    c.harmedBy.forEach(h=>{
+      const fatal=h.type.includes("致死");
+      edges.push({from:h.by,to:c.name,type:fatal?"kill":"harm"});
+    });
+    c.harmed.forEach(h=>{
+      const fatal=h.type.includes("致死");
+      edges.push({from:c.name,to:h.to,type:fatal?"kill":"harm"});
+    });
+    c.friends.forEach(f=>edges.push({from:c.name,to:f,type:"friend"}));
+    c.clan.forEach(cl=>{
+      const target=concubines.find(x=>x.id===cl);
+      if(target) edges.push({from:c.name,to:target.name,type:"clan"});
+    });
+  });
+
+  // 初始圆形布局
+  const cx=W/2, cy=H/2, R=Math.min(W,H)*.38;
+  nodes.forEach((n,i)=>{
+    const a=(i/nodes.length)*Math.PI*2-Math.PI/2;
+    n.x=cx+R*Math.cos(a); n.y=cy+R*Math.sin(a);
+    n.vx=0; n.vy=0;
+  });
+  const nmap={}; nodes.forEach(n=>nmap[n.id]=n);
+
+  // 力导向
+  function tick(){
+    for(let i=0;i<nodes.length;i++)
+      for(let j=i+1;j<nodes.length;j++){
+        const a=nodes[i],b=nodes[j];
+        const dx=b.x-a.x,dy=b.y-a.y,d=Math.max(Math.sqrt(dx*dx+dy*dy),.1);
+        const f=1800/(d*d);
+        a.vx-=f*dx/d; a.vy-=f*dy/d;
+        b.vx+=f*dx/d; b.vy+=f*dy/d;
+      }
+    edges.forEach(e=>{
+      const a=nmap[e.from],b=nmap[e.to]; if(!a||!b)return;
+      const dx=b.x-a.x,dy=b.y-a.y,d=Math.max(Math.sqrt(dx*dx+dy*dy),.1);
+      const f=d*.009;
+      a.vx+=f*dx/d; a.vy+=f*dy/d;
+      b.vx-=f*dx/d; b.vy-=f*dy/d;
+    });
+    nodes.forEach(n=>{
+      n.vx+=(cx-n.x)*.002; n.vy+=(cy-n.y)*.002;
+      n.vx*=.82; n.vy*=.82;
+      n.x=clamp(n.x+n.vx,40,W-40);
+      n.y=clamp(n.y+n.vy,20,H-20);
+    });
+  }
+
+  const EC={kill:"rgba(139,21,21,.85)",harm:"rgba(139,80,0,.6)",friend:"rgba(45,107,74,.8)",clan:"rgba(201,164,68,.35)"};
+  const NC={murdered:"#8b1515",executed:"#8b5200",natural:"#2d6b4a",childbirth:"#5050c9"};
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // 边
+    edges.forEach(e=>{
+      const a=nmap[e.from],b=nmap[e.to]; if(!a||!b)return;
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle=EC[e.type]||"#555";
+      ctx.lineWidth=e.type==="kill"?1.5:.8;
+      ctx.stroke();
+    });
+    // 节点
+    nodes.forEach(n=>{
+      let fill="#555";
+      if(n.type==="concubine"){const c=concubines.find(c=>c.name===n.id);fill=c?NC[c.deathType]||"#4a3a2a":"#4a3a2a";}
+      else if(n.type==="villain")fill="#4a0000";
+      else if(n.type==="emperor")fill="#6b5200";
+      const r=n.type==="emperor"?10:n.type==="villain"?8:6;
+      ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2);
+      ctx.fillStyle=fill; ctx.fill();
+      ctx.strokeStyle="rgba(201,164,68,.25)"; ctx.lineWidth=1; ctx.stroke();
+      ctx.fillStyle=n.type==="villain"?"#c97070":n.type==="emperor"?"#c9a444":"rgba(212,184,150,.85)";
+      ctx.font=`${n.type==="emperor"?"11":"10"}px 'Noto Serif SC',serif`;
+      ctx.textAlign="center"; ctx.fillText(n.id,n.x,n.y-r-4);
+    });
+  }
+
+  let fr=0;
+  function loop(){for(let i=0;i<3;i++)tick();draw();fr++;if(fr<220)requestAnimationFrame(loop);}
+  loop();
+}
+
+// ── Modal ─────────────────────────────────────────────────────
+function renderBio(text){
+  if(!text) return "（小传待录）";
+  return text.replace(/\[\[([^\]]+)\]\]/g, (_,name)=>{
+    const target = concubines.find(c=>c.name===name);
+    if(target) return `<span class="bio-link" onclick="openModal('${target.id}')">${name}</span>`;
+    return name;
+  });
+}
+function openModal(id){
+  const c=concubines.find(c=>c.id===id); if(!c)return;
+  // 图片
+  const imgWrap=document.getElementById("m-img-wrap");
+  if(c.image){
+    imgWrap.innerHTML=`<img class="modal-img" src="${c.image}" alt="${c.name}" onerror="this.outerHTML='<div class=modal-ph>${c.name[0]}</div>'">`;
+  } else {
+    imgWrap.innerHTML=`<div class="modal-ph">${c.name[0]}</div>`;
+  }
+  document.getElementById("m-name").innerHTML=
+    c.name+(c.title?`<span style="font-size:.65em;margin-left:.3em;color:var(--gold-dim)">·${c.title}</span>`:"");
+  document.getElementById("m-meta").textContent=
+    `逸康${c.entryYear}年入宫　逸康${c.deathYear}年殁　享年${c.age}岁　${c.rank}位　${DEATH_LABEL[c.deathType]}${c.killer?"（"+c.killer+"）":""}`;
+  document.getElementById("m-grid").innerHTML=[
+    ["宠爱",c.favor],["好感",c.affection],
+    ["命格",c.fate.length?c.fate.join("·"):"无"],
+    ["子嗣",`${c.sons}子${c.survivingSons}存 ${c.daughters}女${c.survivingDaughters}存`],
+    ["出身",c.origin],["擅长",c.specialty||"—"],
+  ].map(([l,v])=>`<div class="m-stat"><span class="m-stat-l">${l}</span><div class="m-stat-v">${v}</div></div>`).join("");
+  document.getElementById("m-bio").textContent=c.bio||"（小传待录）";
+  document.getElementById("m-jd").textContent=c.judgment||"（判词待录）";
+  document.getElementById("modal").classList.add("active");
+  document.body.style.overflow="hidden";
+}
+function closeModal(){document.getElementById("modal").classList.remove("active");document.body.style.overflow="";}
+function modalBgClick(e){if(e.target===document.getElementById("modal"))closeModal();}
+
+// ── 视图切换 ─────────────────────────────────────────────────
+function switchView(name,btn){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById("view-"+name).classList.add("active");
+  btn.classList.add("active");
+  if(name==="timeline")renderTimeline();
+  if(name==="network")renderNetwork();
+}
+
+// ── 初始化 ────────────────────────────────────────────────────
+renderFilterBar();
+renderCards();
+</script>
+</body>
+</html>
