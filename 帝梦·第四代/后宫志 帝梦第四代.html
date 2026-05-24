@@ -57,8 +57,9 @@ nav{display:flex;justify-content:center;border-bottom:1px solid var(--border)}
 .death-badge{display:inline-block;font-size:.58rem;padding:.12rem .45rem;letter-spacing:.1em;margin-bottom:.65rem}
 .death-murdered{background:rgba(139,21,21,.25);color:#c97070;border:1px solid rgba(139,21,21,.45)}
 .death-executed{background:rgba(80,40,0,.25);color:#c9a070;border:1px solid rgba(139,80,0,.45)}
-.death-natural{background:rgba(20,60,40,.25);color:#70c9a0;border:1px solid rgba(20,100,60,.45)}
+.death-natural{background:rgba(20,60,90,.25);color:#70b0c9;border:1px solid rgba(20,90,130,.45)}
 .death-childbirth{background:rgba(40,40,80,.25);color:#9090c9;border:1px solid rgba(40,40,120,.45)}
+.death-surviving{background:rgba(20,80,45,.25);color:#70c990;border:1px solid rgba(20,120,60,.45)}
 .card-bars{display:flex;gap:.8rem;margin-bottom:.7rem}
 .bar-group{flex:1;text-align:center}
 .bar-label{font-size:.52rem;color:var(--text-dim);letter-spacing:.08em;display:block;margin-bottom:.2rem}
@@ -110,17 +111,23 @@ nav{display:flex;justify-content:center;border-bottom:1px solid var(--border)}
 .tl-bar{position:absolute;height:9px;top:50%;transform:translateY(-50%);border-radius:1px;opacity:.65;transition:opacity .2s}
 .tl-bar.murdered{background:linear-gradient(90deg,var(--crimson-dim),var(--crimson))}
 .tl-bar.executed{background:linear-gradient(90deg,#4a2800,#8b5200)}
-.tl-bar.natural{background:linear-gradient(90deg,#1a4030,var(--jade))}
+.tl-bar.natural{background:linear-gradient(90deg,#1a3a50,#3a7a9a)}
+.tl-bar.surviving{background:linear-gradient(90deg,#1a4025,#2d8b50)}
 .tl-bar.childbirth{background:linear-gradient(90deg,#1a1a50,#3a3a8b)}
 .tl-dot-s{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--gold-dim);top:50%;transform:translateY(-50%)}
 .tl-dot-e{position:absolute;width:7px;height:7px;border-radius:50%;top:50%;transform:translateY(-50%)}
 .tl-dot-e.murdered{background:var(--crimson);box-shadow:0 0 5px var(--crimson)}
 .tl-dot-e.executed{background:#8b5200}
-.tl-dot-e.natural{background:var(--jade)}
+.tl-dot-e.natural{background:#3a7a9a}
+.tl-dot-e.surviving{background:#2d8b50}
 .tl-dot-e.childbirth{background:#5050c9}
 .legend{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:1.4rem;max-width:860px;margin-left:auto;margin-right:auto}
 .leg-item{display:flex;align-items:center;gap:.35rem;font-size:.62rem;color:var(--text-dim)}
 .leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ── Sort group ── */
+.sort-group{display:flex;gap:.5rem;align-items:center;margin-left:auto;
+  padding-left:.85rem;border-left:1px solid var(--border)}
 
 /* ── Network ── */
 #net-canvas{display:block;width:100%;max-width:900px;margin:0 auto;cursor:default}
@@ -250,7 +257,7 @@ nav{display:flex;justify-content:center;border-bottom:1px solid var(--border)}
   favor       宠爱值
   affection   好感值（她对帝的感情）
   fate        命格数组，如 ["强健","仁爱"]，无则 []
-  deathType   "murdered"被害 / "executed"赐死 / "natural"自然 / "childbirth"难产
+  deathType   "murdered"被害 / "executed"赐死 / "natural"病逝 / "childbirth"难产 / "surviving"存世（结档仍在世）
   killer      直接凶手姓名，无则 ""
   sons        皇子总数
   survivingSons    现存皇子数
@@ -268,10 +275,7 @@ nav{display:flex;justify-content:center;border-bottom:1px solid var(--border)}
 // ── 非妃嫔节点 ──────────────────────────────────────────────
 const others = [
   { id:"emperor",    name:"帝",     type:"emperor"  },
-  { id:"yunxuanluo", name:"云玄珞", type:"villain"  },
-  { id:"shenwanhui", name:"沈菀惠", type:"villain"  },
-  { id:"mulaide",    name:"穆莱德", type:"villain"  },
-  { id:"wangyulan",  name:"王羽兰", type:"villain"  },
+ // { id:"yunxuanluo", name:"云玄珞", type:"villain"  },
 ];
 
 // ── 妃嫔数据 ────────────────────────────────────────────────
@@ -733,18 +737,559 @@ const concubines = [
       {by:"夏宁昭",type:"染病",year:15},
       {by:"帝",    type:"赐药小产",year:16},
       {by:"穆莱德",type:"染病",year:18},
+      {by:"帝",    type:"赐药小产",year:16},
     ],
     harmed:[],
-    bio:"",
+    image:"images/沈怡巧.png",
+    bio:
+    `人物简介
+沈氏，出身豫地仕宦之家，父为地方五品武官，家族势力不薄。她入宫缘起帝见她"明媚活泼"，时年约十九岁，是逸康朝最早入宫的一批妃嫔之一——逸康元年正月，她就已在这里了。
+宠爱两千三百七十八，盛宠，是本朝所有妃嫔中帝王情分最深的一位；好感一千八百五十六，她对帝亦深情以报，十八年里两相维系，感情从未断过。野心移天换日九分，意志百折不挠九分，双九，是她一生最清晰的底色。她不只是想，她还真的去争、去求、去熬——她是本朝第一个主动求见帝王的妃嫔，破例之举，帝不仅未拒，反而留下了这段说法。
+她爱撒娇，脾气坏，没什么文化，却生得花容月貌，擅乐器，能让帝心甘情愿被她的脾气磨着。惩戒三次，记过六次，不算干净，但不是出于恶意，更多是性情带来的莽撞。
+帝说她"难怀孕"——以她一百一十五次宠幸却仅得数次孕事的记录而言，这是事实，也是她一生中最深的坎。
+宫中挚友[[苏思珞]]，是她这十八年里唯一记名的交好之人。
+
+编年经历
+逸康元年正月初三，沈怡巧入宫，封为常在，时年约十九岁。彼时[[夏宁昭]]尚未入宫，[[杨旭嫣]]还要一年，[[黎则曦]]要再等两年才会踏入宫门。她是这一代妃嫔中资历最深的一人，在所有人之前，她先在这里了。
+此后四年有余，帝宠幸持续，却无孕事。逸康五年九月初一，因侍奉有功晋封为美人——这是她第一次晋封，靠的不是孕事，而是真实的情分积累，是帝对她这个人的肯定。
+六日后，逸康五年九月初七，沈怡巧报告有孕。
+后查出为假孕，帝记过一条，暂不处罚。
+入宫四年多，一直未孕，终于得了封号，六天之内便报出喜讯——这件事，是莽撞还是焦虑，是算计还是误判，已难定论。帝宽容地只记了一过，未曾深究，大约也看在她十分的眷爱面上，选择放过。
+此后又是两年多的等待。逸康八年五月初六，真正有孕，两日后晋封为贵人。逸康九年二月初三，诞下公主周依十映，当日晋为小仪。
+然而这个孩子未能留住。逸康十年五月，十公主周依十映夭折，不足两岁。她失去这个孩子的同时，腹中已怀着另一个——逸康十年四月初九便已有孕，初十一晋封为嫔。逸康十一年正月初五，次女周依十四冰出生，翌日晋为婉仪。
+此后四年，平稳而绵长。帝的宠幸未断，却迟迟无孕，直到逸康十五年。
+逸康十五年正月初九，夏宁昭染她疾病——彼时[[夏宁昭]]刚自佛寺回宫不满一年，出手之早，可见其不曾真正收敛。病中两个月后，逸康十五年三月初九，沈怡巧再次有孕，翌日晋封为容华。那年四月，登上季宠妃之位。逸康十五年十一月初七，诞下皇子周允十八金，翌日晋为婕妤。这是她在宫中的第一个儿子，她等了十五年。
+逸康十六年十一月初七，周允十八金周岁之日，沈怡巧再次有孕，当日晋封为贵嫔。
+逸康十六年十二月初三，帝赐药小产。
+无论何故，那个孩子就这样去了。以她对帝的好感之深、帝对她的宠爱之重，这一刀依然落了下来。
+逸康十七年一月，上季宠妃。帝的情分，始终在。
+逸康十八年九月初七，第五次有孕，当日晋封为昭仪。三日后，逸康十八年九月初十，[[穆莱德出手，令她突染疾病。她带病怀孕，撑过了漫长的九个月。
+逸康十九年六月初一，沈怡巧诞下皇子周允二十八开。同日，晋封为妃——逸康朝的宫廷中，她是所有妃嫔里位分最高的一位，攀到了这里，花了她十八年。
+同日，难产去世。
+妃位是她人生的顶点，也是她人生的终点，与那个孩子的出生落在同一天，同一刻。
+
+推测
+十八年，一百一十五次宠幸，五次有孕——帝说她难怀孕，的确如此，但她每一次抓住了，就没有松手。百折不挠的意志，在她的宫廷岁月里体现得最为真实：假孕受过之后重新开始，丧女之痛中继续，染病之中继续，一个孩子被赐药取走之后继续。她的移天换日之野心，不是阴谋，而是一种燃烧着的、向着帝王之心不断靠近的执念。
+帝对她的情分，是整个后宫中最深的。他记住了她爱撒娇，记住了她脾气坏，记住了她没什么文化，记住了她难怀孕，也记住了她是第一个主动找上门来的那个人。好的、坏的，都记得清清楚楚，这本身，便是最深的在意。
+周允二十八开出生时，母亲已经不在了。
+
+结语
+逸康十九年六月初一，沈怡巧，年三十七，以妃位难产去世。在宫十八年，育有皇子周允十八金、周允二十八开，公主周依十四冰，现存三人。公主周依十映早夭，一孕赐药失子，五孕留三，一生以百折不挠之志，熬至盛宠最深处。`,
     judgment:
-`明媚活泼帝倾重，
-十八盛宠最深浓。
-假孕受过百折起，
-四孕艰辛攀妃峰。
-产日妃日亦殁日，
-廿八皇子望长空。`,
+`明媚活泼帝倾重，十八盛宠最深浓。
+假孕受过百折起，四孕艰辛攀妃峰。
+产日妃日亦殁日，廿八皇子望长空。`,
   },
 
+  // ══════════════════════════════════════
+  // 周广怡
+  // ══════════════════════════════════════
+  {
+    id:"zhou_guang_yi",           // 唯一 id，拼音
+    name:"周广怡",
+    title:"惠",        // 封号，无则 ""
+    rank:"贵妃",         // 最终位分
+    age:31,
+    origin:"京畿小农",
+    specialty:"刺绣",
+    entryYear:6,
+    deathYear:21,
+    favor:2193,
+    affection:1541,
+    fate:["孤星","本善"],         // 命格，如 ["强健","仁爱"]
+    deathType:"childbirth",    // murdered / executed / natural / childbirth / surviving
+    killer:"",       // 无则 ""
+    sons:3, survivingSons:1,
+    daughters:3, survivingDaughters:2,
+    enemies:["穆莱德"],
+    friends:[],
+    clan:[],         // 同族妃嫔 id
+    harmedBy:[
+      {by:"帝",    type:"赐药小产",year:7},  
+      {by:"穆莱德",type:"染病",year:16},
+    ],     // { by:"姓名", type:"小产/染病/落水致死", year:X }
+    harmed:[],       // { to:"姓名", type:"...", year:X }
+    image:"images/周广怡.jpg",        // 图片路径，如 "images/某某.jpg"，无图则留 ""
+    bio:`
+    人物简介
+周氏，出身京畿小农之家，是本朝诸妃中出身最为低微的一位——她不是仕宦之女，不是商贾之女，而是田间的农家姑娘。帝闲逛田野时偶然遇见，带回宫中。她就这样从土地上来，进入了这座宫廷，最终登至贵妃之位，是本册所有妃嫔中位分攀升跨度最大的一人。
+容貌明眸皓齿，擅刺绣，每年七夕宫中针线比赛无一落败，巧手是她身上最鲜明的标记之一。性情温和，道德心地善良，对宫人关怀备至，帝曾说她"善良，关心宫人"——农家出身的人，大约从未真正忘记过自己是谁。交际孤立无援，她的善意更多给了身份低微的人，而非朝着位高权重处攀附。
+才智六分，机智灵活，野心不高，只求荣华平安。惩戒记过皆为零，十六年从未出格。
+命格两字：孤星、本善。本善是真的，帝亲口所言；孤星亦是真的——她在宫中几乎没有盟友，十六年失去了许多孩子，最终一个人死在产床上。
+
+编年经历
+逸康六年六月初二，周广怡入宫，封为答应，时年约十五岁。宠幸随之而来，频率稳定，十六年间共计六十二次，年均约四次，属正常水平，不算密集，却始终延续。宠爱两千一百九十三，盛宠之列，好感一千五百四十一，她对帝亦有深厚的真实情感。
+入宫六个月，逸康六年十二月十三日，第一次有孕，两日后晋封为常在。
+逸康七年正月初三，帝赐药，令其小产。因诊出为女胎，宫中女儿已多，帝不留。这是她入宫第一个孩子，来不及真正开始，便已结束。
+此后一年有余，逸康八年三月十三日，再次有孕，当日晋封为美人。逸康八年十二月初六，诞下皇子周允九涟，翌日晋为贵人。
+不足一年，逸康九年十一月初六，第三次有孕，晋为小仪。逸康十年八月初二，诞下皇子周允十三德——这一天，恰是她自己的生辰。她在自己的生日这一天，为帝再添一子，晋为嫔。
+两子接连落地，帝喜称她"相当好孕，连生两个儿子"。此后四个月，逸康十年十二月初九，第四次有孕，当日晋为婉仪。逸康十一年九月初八，诞下公主周依十八墨，二日后晋为容华。
+产后仅两个月，逸康十一年十一月初七，第五次有孕，晋为婕妤。然而逸康十二年正月初十，腹中胎儿不足两月，因身体虚弱，小产。
+身体尚未恢复，逸康十二年五月初七，第六次有孕，晋为贵嫔，同日再度小产——那个孩子几乎来不及留下任何痕迹。
+连续两次孕失，身体的损耗已至极限。逸康十二年七月，更沉的消息随之而来：皇子周允九涟夭折，年仅三四岁。
+逸康十四年六月，公主周依十八墨亦夭折，年约三岁。
+两年之间，两子先后离去，自己的身体两度不支。逸康十二年到逸康十五年，整整三年，她没有再孕，或许正是这段时间，让那具被一次次消耗的身体得以喘息。
+逸康十五年七月初六，第七次有孕，晋为昭仪。逸康十六年三月初九，诞下公主周依二十五霂，两日后晋为妃。逸康十六年四月初一，帝赐封号"惠"——那个字，对她而言，实至名归。
+仅两个月后，逸康十六年五月初七，第八次有孕，当日晋为贵妃。她在不足两个月的产后再度有孕，身体已是透支，而位分，也在这一刻攀至了顶。
+逸康十七年二月初二，难产。孩子未能保住，她自己挣扎着活了下来。
+此后一年有余休养，逸康十八年三月初九，第九次有孕。逸康十八年十二月十一日，皇子周允二十七瀚出生。
+逸康二十年一月，上季宠妃。同月初八，第十次有孕。六日后，正月十四日，[[穆莱德]]出手，令她突染疾病——与其此前加害[[沈怡巧]]、[[麦希]]如出一辙。这一场病，拖了半年，逸康二十年七月初七，腹中胎儿终于保不住，小产。
+逸康二十一年三月初五，第十一次有孕。同年五月，周允二十七瀚夭折，她挺着腹中的孩子，送走了这个儿子。
+逸康二十一年十二月初五，诞下公主周依三十六琴。
+次日，十二月初六，难产去世。
+
+推测
+十一次孕事，是本朝诸妃中最多的记录。生了六个孩子，失了五次，存活三人，先后夭折三子。她的身体在一次次的生育与失育之间被蚕食，每一回"身体虚弱"所致的小产，都是那具日渐透支的身体在发出的警报，而宫廷的节奏从未真正给过她足够的喘息。
+帝对她的情分是真实的，盛宠延续十六年，封号"惠"亦是对她性情的认可。她照顾宫人，以针线胜过所有人，是这座宫廷里少见的从田野而来又从未改变自己的人。孤星命格，不是说她不被爱，而是说她始终一个人扛着那份重量——失孩子的时候，失血的时候，撑过难产的时候。
+她在逸康十六年便已是贵妃，往后五年，她送走了[[穆莱德]]带来的病、送走了周允二十七瀚、送走了肚子里那个十一次的孩子，然后自己也走了，就在周依三十六琴出生的第二天。
+
+结语
+逸康二十一年十二月初六，周广怡，封号惠，年三十一，以贵妃位难产去世。在宫十六年，十一度有孕，育有皇子二、公主二现存，周允十三德、周依二十五霂、周依三十六琴留于宫中。七夕刺绣，年年夺冠，此后无人再胜。
+    `,
+    judgment:
+    `绣艺七夕年年冠，田间偶遇入宫关。
+十一孕事四子散，本善孤星命两难。
+贵妃盛宠十六载，产后一夜问苍天。`,
+  },
+
+    // ══════════════════════════════════════
+  // 穆莱德
+  // ══════════════════════════════════════
+  {
+    id:"mu_lai_de",           // 唯一 id，拼音
+    name:"穆莱德",
+    title:"",        // 封号，无则 ""
+    rank:"贵嫔",         // 最终位分
+    age:25,
+    origin:"朝地贡",
+    specialty:"乐器",
+    entryYear:13,
+    deathYear:22,
+    favor:633,
+    affection:422,
+    fate:["病弱","利欲","性灵"],         // 命格，如 ["强健","仁爱"]
+    deathType:"natural",    // murdered / executed / natural / childbirth / surviving
+    killer:"",       // 无则 ""
+    sons:0, survivingSons:0,
+    daughters:2, survivingDaughters:2,
+    enemies:["王羽兰","云玄珞"],
+    friends:["赵蓉卿","许安雪","燕渊纯"],
+    clan:[],         // 同族妃嫔 id
+    harmedBy:[
+      {by:"云玄珞",type:"染病",year:17},
+      {by:"王羽兰",type:"小产",year:19},
+    ],     // { by:"姓名", type:"小产/染病/落水致死", year:X }
+    harmed:[
+      {to:"麦希",type:"小产",year:14},
+      {to:"麦希",type:"小产",year:14},
+      {to:"沈怡巧",type:"染病",year:18},
+      {to:"周广怡",type:"小产",year:20},
+    ],       // { to:"姓名", type:"...", year:X }
+    image:"images/穆莱德.jpg",        // 图片路径，如 "images/某某.jpg"，无图则留 ""
+    bio:`
+    人物简介
+穆莱德，朝地贡女，是本朝入宫的第四位异邦贡女，亦是唯一一个活到最后的。[[麦希]]、[[法尔莱]]、[[麦尼修]]，三位前后入宫的贡女姐妹，皆先她而去；帝曾以一种含着几分戏谑的语气说："贡女都快死光了你还活着。"这是一句实话，也是一种奇异的幸运。
+容貌明眸皓齿，擅乐器，性情温和，言行温柔小意，帝对她颇有好感。才智七分，意志百折不挠八分——她的聪明与韧性，在九年的宫廷生涯中一再体现。命格三字：病弱、利欲、性灵。病弱是她最终的命数，利欲驱动了她的出手，性灵或是她乐器天赋与那份对周遭敏锐感知的来源。
+野心荣华富贵七分，道德凡夫俗子，是一个并不特别善良、也不特别恶毒的人，只是在宫廷这个地方，把手伸向了不该伸的地方，数次，留下了数份血账。
+惩戒三次，记过六次，两度禁足，是宫中被处罚不轻的一位。
+宫中少有盟友，却也不是全然孤立：与[[赵蓉卿]]、[[许安雪]]、[[燕渊纯]]同派，彼此地位相仿、相处和谐，偶有嫉妒彼此的家世，却仍算真实的情谊。她厌恶[[王羽兰]]与[[云玄珞]]，皆因以血为代价。
+
+编年经历
+逸康十三年十二月初一，穆莱德入宫，封为答应，时年约十六岁。与她前后入宫的贡女[[麦希]]已在宫中两年，[[法尔莱]]亦已一年有余，她是最晚到的那一个。
+入宫仅一个月，逸康十四年正月初六便告有孕，翌日晋为常在。帝说她"好孕，一次就有了"，这是真的。
+然而逸康十四年五月，她出手加害[[麦希]]，致其小产，记过一条。这是她在宫中的第一次动手，也是她与[[麦希]]之间一段血仇的开端。
+逸康十四年十月初八，诞下公主周依二十娉，两日后晋为美人。
+两个月后，逸康十四年十二月，她再度加害[[麦希]]，令其再次小产。帝查明，下旨将周依二十娉过继给[[麦希]]，以作补偿。她的第一个孩子，以两个月大的稚龄，被从她身边带走，送到她所害之人的名下。周依二十娉后来在[[麦希]]处长大，逸康十八年二月夭折，那时穆莱德仍在宫中。
+逸康十五年十二月初七，再次有孕，晋为贵人。逸康十六年九月初七，诞下皇子周允二十远，翌日晋为小仪。
+逸康十七年一月，周允二十远夭折，不足四月。她失而复得的孩子，留了不到四个月。
+逸康十七年九月初六，[[云玄珞]]出手，令她突染疾病。同日，[[云玄珞]]亦攻[[黎则曦]]，两人同遭一手，同日染病。帝未追究[[云玄珞]]。
+此后一年，逸康十八年十月，经查穆莱德曾毒害[[沈怡巧]]。调查尚在进行，逸康十八年十月十二日，她报孕，两日后晋为嫔——罪行与晋封几乎并排落在同月。逸康十九年一月，上季宠妃。
+逸康十九年五月初十，[[王羽兰]]出手，令其意外小产。她厌恶[[王羽兰]]，这份恨，与她当年加害[[麦希]]的方式如出一辙，只是这次轮到了她。
+逸康十九年八月初八，再次有孕，晋为婉仪。
+逸康二十年一月，毒害[[周广怡]]，致其染病小产，被禁足半年。逸康二十年五月初二，于禁足将满之际，诞下公主[[周依三十三无]]，当日晋为容华。
+逸康二十年八月，再度禁足半年，理由不详，或与前案余波相关。
+逸康二十一年四月初七，有孕，晋为婕妤。逸康二十二年正月初十，诞下公主周依三十七应，当日晋为贵嫔。她将两个女儿都留在身边，唤长女"小傻瓜"，唤幼女"小奶娃"，盼她们健康长大。
+逸康二十二年秋，传来消息：[[云玄珞]]被从皇姑寺接回后宫。
+逸康二十二年十月初一，穆莱德病逝。
+
+推测
+云玄珞曾在逸康十七年令她染病，帝彼时未曾追究。此后云玄珞又连续出手杀害多名宫中女子，终于在逸康十九年前后被遣至皇姑寺。三年余，穆莱德得以喘息。然而逸康二十二年，[[云玄珞]]归来，皇姑寺的岁月并未让那个名字变得安全。
+帝说她"幸运"，她或许也知道自己幸运，知道[[麦希]]、[[法尔莱]]、[[麦尼修]]一一离去，知道[[云玄珞]]的每一次出手意味着什么。当那个名字再度出现在宫中，她的病弱命格，加上惊惧交加的心，撑不住了。
+她加害过三人，被害过两次，失去过长女、失去过幼子，被关押、被调查、被追责，九年里几乎没有真正安稳的时候。百折不挠的意志支撑她走了这么远，最后倒在了一个名字的归来面前。
+两个女儿尚在，年幼，身边无母。
+
+结语
+逸康二十二年十月初一，穆莱德，年二十五，以贵嫔位病逝，惊惧所致`,
+    judgment:
+    `朝地贡来性灵妍，九年加害三宫难。
+一女被夺子先夭，云影归来惊魂散。
+两女留宫身已去，幸存贡女问苍天。`,
+  },
+
+  // ══════════════════════════════════════
+  // 赵蓉卿
+  // ══════════════════════════════════════
+  {
+    id:"zhao_rong_qing",           // 唯一 id，拼音
+    name:"赵蓉卿",
+    title:"",        // 封号，无则 ""
+    rank:"常在",         // 最终位分
+    age:17,
+    origin:"楚地乡绅",
+    specialty:"烹饪",
+    entryYear:20,
+    deathYear:22,
+    favor:244,
+    affection:242,
+    fate:["利欲"],         // 命格，如 ["强健","仁爱"]
+    deathType:"murdered",    // murdered / executed / natural / childbirth / surviving
+    killer:"云玄珞",       // 无则 ""
+    sons:0, survivingSons:0,
+    daughters:0, survivingDaughters:0,
+    enemies:[],
+    friends:[],
+    clan:[],         // 同族妃嫔 id
+    harmedBy:[
+      {by:"云玄珞",type:"落水致死",year:22},
+    ],     // { by:"姓名", type:"小产/染病/落水致死", year:X }
+    harmed:[],       // { to:"姓名", type:"...", year:X }
+    image:"images/赵蓉卿.jpg",        // 图片路径，如 "images/某某.jpg"，无图则留 ""
+    bio:`
+    人物简介
+赵氏，出身楚地乡绅之家，大选入宫，帝见她"长相可爱"，当日便是一见倾心。她性情活泼，交际左右逢源，容貌花容月貌，擅烹饪，是那种走进任何场合都能让人注目的人。意志勇敢坚定，野心荣华富贵六分，命格利欲——聪明，知道自己要什么，也知道怎么让人喜欢。
+然而道德一项，冷血无情，评分仅三。活泼的外表之下，是一份刻薄而清醒的底色。惩戒记过皆为零，她从未将那份冷意付诸行动，只是藏着，不轻易显露。
+宫中与[[穆莱德]]同派相处，彼此地位相仿，嫉妒对方的家世，却也算真实的情谊。
+
+编年经历
+逸康二十年四月初一，赵蓉卿入宫，封为常在，时年约十五岁。以一见倾心之故，起点高于最低一级。
+入宫仅三个月，逸康二十年七月，便登上季宠妃之位。两年间宠幸十四次，年均七次，帝对她的热度从未在最初便消退，只是情分始终没能积累至深——宠爱两百四十四，好感两百四十二，两者几乎等同，都只是浅浅的一层，她对帝亦不算有什么真实的深情，不过是互相停留在一个不远不近的距离上。
+两年，无孕，无晋封，无出格，宫中的日子平静地流逝。
+逸康二十二年十月初一，她的朋友[[穆莱德]]病逝。[[云玄珞]]刚从皇姑寺归来，[[穆莱德]]在惊惧之中撑不住，先走了一步。
+一个月后，逸康二十二年十一月二十日，赵蓉卿落水身亡，系[[云玄珞]]所为。
+
+推测
+云玄珞这一年归来，一个月内接连带走了两个人——先是[[穆莱德]]死于惊惧，再是[[赵蓉卿]]死于落水。她们是同一派系的朋友，地位相仿，相处和谐，嫉妒彼此的家世，却也算彼此认识的人。一个月里，[[赵蓉卿]]大约亲眼见着这位朋友在恐惧中离去，然后轮到了自己。
+活泼的人，往往死得最无声。她交际左右逢源，冷血无情藏在笑意里，在宫中两年没有留下任何把柄，最终不是因为任何自己做过的事情离去，只是因为[[云玄珞]]伸出了那只手。
+十七岁，常在位，一见倾心，上季宠妃，然后落水。
+
+结语
+逸康二十二年十一月二十日，赵蓉卿，年十七，以常在位落水身亡，系[[云玄珞]]所为。在宫两年，无封号，无子嗣，无哀荣。友先去一月，她随后。`,
+    judgment:
+    `楚地入宫帝心倾，三月宠妃满宫庭。
+活泼背下冷如冰，友亡月余云氏凌。
+十七芳年宫路短，利欲荣华付浮萍。`,
+  },
+
+  // ══════════════════════════════════════
+  // 云玄珞
+  // ══════════════════════════════════════
+  {
+    id:"yun_xuan_luo",           // 唯一 id，拼音
+    name:"云玄珞",
+    title:"柔",        // 封号，无则 ""
+    rank:"妃",         // 最终位分
+    age:33,
+    origin:"京畿宫人,正七品文官云永仁之女",
+    specialty:"",
+    entryYear:4,
+    deathYear:22,
+    favor:3174,
+    affection:3596,
+    fate:[],         // 命格，如 ["强健","仁爱"]
+    deathType:"executed",    // murdered / executed / natural / childbirth / surviving
+    killer:"帝",       // 无则 ""
+    sons:1, survivingSons:0,
+    daughters:2, survivingDaughters:1,
+    enemies:["夏宁昭","完颜昭媚"],
+    friends:["云诗白"],
+    clan:["yun_shi_bai"],         // 同族妃嫔 id
+    harmedBy:[],     // { by:"姓名", type:"小产/染病/落水致死", year:X }
+    harmed:[
+      {to:"穆昭幽", type:"小产", year:6},
+      {to:"叶凝雁", type:"染病", year:8},
+      {to:"杨旭嫣", type:"染病", year:9},
+      {to:"杨旭嫣", type:"小产", year:9},
+      {to:"林翰清", type:"小产", year:14},
+      {to:"东方允鸾", type:"染病", year:15},
+      {to:"东方允鸾", type:"染病", year:15},
+      {to:"叶夜媚", type:"染病", year:15},
+      {to:"万俟薇莹", type:"落水致死", year:16},
+      {to:"夏宁昭", type:"落水致死", year:16},
+      {to:"宇文婉墨", type:"染病", year:16},
+      {to:"法尔莱", type:"染病", year:16},
+      {to:"王婉蓁", type:"落水致死", year:17},
+      {to:"顾媛鸾", type:"染病", year:17},
+      {to:"林兰媛", type:"染病", year:17},
+      {to:"麦尼修", type:"染病", year:17},
+      {to:"欧阳仁幽", type:"染病", year:17},
+      {to:"黎则曦", type:"染病", year:17},
+      {to:"穆莱德", type:"染病", year:17},
+      {to:"许思兰", type:"染病", year:18},
+      {to:"麦希", type:"落水致死", year:18},
+      {to:"柳熙淑", type:"染病", year:18},
+      {to:"法尔莱", type:"落水致死", year:18},
+      {to:"完颜昭媚", type:"落水致死", year:19},
+      {to:"阮靖雪", type:"染病", year:22},
+      {to:"许思兰", type:"染病", year:22},
+      {to:"赵蓉卿", type:"落水致死", year:22},
+    ],       // { to:"姓名", type:"...", year:X }
+    image:"images/云玄珞.jpg",        // 图片路径，如 "images/某某.jpg"，无图则留 ""
+    bio:`
+    人物简介
+云氏，出身京畿宫人之家，父为正七品文官云永仁之女，家族势力两千三百余，是宫中背景颇为雄厚的一位。她容貌风华绝代，交际左右逢源，才智六分，意志百折不挠，野心移天换日——这些加在一起，便是一个在深宫中极度危险的人。
+道德心如蛇蝎，评分仅一。但她性情温和，封号为"柔"，帝对她一见倾心，称她"长在我审美点上"，"前世姻缘"。这是她最深的保护，也是她一次次得以归来的根本。
+命格为空。她做的每一件事，都是她自己的选择。
+宠爱三千一百七十四，是本朝所有妃嫔中帝王情分最深的一位；好感三千五百九十六，她对帝的爱，更深于帝对她的爱。宫中有人为帝的宠爱争夺厮杀，而她的野心只有一个指向：帝王的心，全部的心，只属于她一个人的心。十八年间共计宠幸二百零八次，年均逾十一次，是所有妃嫔中最为密集的记录。
+她的心境，帝知晓一二：思考人生，想占有帝王心，狠毒，野心勃勃，以家族为底气，以容貌为自信，以年龄为焦虑——她在宫中一年年往前走，越来越清楚地知道年华在逝，知道新人在来，知道那份宠爱随时可以落向别处，于是出手，一次又一次。
+帝曾说："她总是害人，一定是因为我忽视了她。"
+这句话，是怜悯，是自省，也是他唯一说出口的解释。
+
+编年经历
+逸康四年五月初一，云玄珞入宫，封为答应，时年约十五岁。入宫仅两个月，逸康四年七月初一，帝以"喜欢"为由，将她晋为常在——不是孕事，不是资历，只是喜欢。八月初二，赐封号"柔"。三个月，封号，这在本朝几乎是最快的记录之一。
+逸康五年正月，有孕，晋为美人。同年九月，诞下公主周依六敏，晋为贵人。十二月，再度有孕，晋为小仪。
+逸康六年，是她上升最快的一年。六月，以久侍宫廷晋为嫔；十月，诞下公主周依九琛，晋为婉仪；十二月，再以久侍宫廷晋为容华。三月，帝为她治了相思病。一年之内连跨数级，她在帝心中的位置，彼时无人能及。
+然而也是在逸康六年十月，她第一次出手——害[[穆昭幽]]小产，被禁足一月。
+这是她宫中暴力的起点，也是一个从未真正停止过的开端。
+此后两年，逸康八年，令[[叶凝雁]]染病，记过禁足。逸康九年，两度出手毒害[[杨旭嫣]]，终于在第二次加害时令其小产，[[杨旭嫣]]以婉仪位殁，年二十七。逸康十年五月，帝将她迁居宫外佛寺，这是她第一次被逐出宫墙。
+逸康十一年七月，被接回后宫。同年十一月，帝以"朕心甚悦"将她晋为婕妤。这个理由，与当年的"因喜欢"一样，是帝给她的，与孕事无关，与功绩无关，只是因为他想要她在更高的位置上。
+归来后，她仍未止手。逸康十四年，令[[林翰清]]小产，帝压下不记；逸康十五年，接连毒害[[东方允鸾]]两次、[[叶夜媚]]一次。逸康十五年二月，帝再度以"因喜欢"将她晋为贵嫔。
+同年帝被一见倾心的[[完颜昭媚]]入宫，四季连续宠妃。云玄珞的焦虑，在那两年里到达某个临界点。
+逸康十六年四月，[[万俟薇莹]]落水身亡，[[夏宁昭]]落水身亡，同月，同手。五月，毒害[[宇文婉墨]]、[[法尔莱]]，被禁足半年。逸康十七年一月，推[[王婉蓁]]入水身亡。
+三月，她自己有了身孕，晋为昭仪。此后数月，她一边怀着孩子，一边继续出手——三月毒害[[顾媛鸾]]，五月毒害[[林兰媛]]，七月毒害[[麦尼修]]，八月毒害[[欧阳仁幽]]，十月毒害[[黎则曦]]与[[穆莱德]]，两人同日。
+逸康十七年十二月初一，诞下皇子周允二十六鸿，当日晋为妃。
+逸康十八年，查出毒害[[许思兰]]，七月推[[麦希]]入水致死，八月毒害[[柳熙淑]]，十月推[[法尔莱]]入水致死。
+逸康十九年五月，[[完颜昭媚]]落水身亡——那是她曾经的宫女，叛出名下，得了帝王的最浓宠爱，四季宠妃，封号"媚"，帝盼着与她生孩子。云玄珞亲手送她入水。
+同月，帝再度将她迁居宫外佛寺。这一次，她在那里待了整整三年。
+逸康二十一年四月，皇子周允二十六鸿夭折。她不在宫中，消息传来，不知以何种心情在寺中收了这个噩耗。她的儿子，她最后的孩子，在她不在的时候走了。公主周依六敏早已不在，只剩周依九琛，远在封地，帝说她"愚钝令人失望"。
+逸康二十二年七月初一，被接回后宫。
+十月，上季宠妃。她三十三岁，依旧是那个帝视作"前世姻缘"的人，归来便又是最受宠的那一个。
+八月，同时毒害[[阮靖雪]]和[[许思兰]]。十一月，推[[赵蓉卿]]落水身亡。记大过。
+逸康二十二年十二月初一，被打入冷宫，同日赐死。
+帝命其陪葬皇陵。
+
+推测
+她一生的暴力，几乎皆因爱而起。她的好感之数超过宠爱，是本朝所有妃嫔中唯一一个爱帝深过帝爱她的人——她想要的不是位分，不是子嗣，而是帝王的心，完整的、排他的、永远的心。每一个让帝分神的女人，在她眼中都是威胁；每一次帝的目光落到别处，对她而言都是一刀。
+帝说"一定是因为我忽视了她"。这话里有几分真，几分是他自己无法承受的愧疚，已难分辨。她在宫中三十三年，被送进佛寺两次，每次归来仍然出手，说明的不是帝忽视了她，而是她根本无法停止。命格为无，没有命运可以推卸，她做的每一件事，都是她自己选择的。
+两度佛寺，二十余人受害，八人殒命，她仍然在赐死当月上过季宠妃。帝爱她，爱到最后一刻，仍然让她陪葬皇陵。
+封号柔，这两个字，是他给她的，也是这段关系里最深的讽刺。`,
+    judgment:
+    `风华入宫帝惊鸿，好感深于帝宠重。
+封号为柔心为刃，因爱生恨害宫中。
+赐死葬于皇陵侧，命格为无终自攻。`,
+  },
+
+    // ══════════════════════════════════════
+  // 顾媛鸾
+  // ══════════════════════════════════════
+  {
+    id:"gu_yuan_luan",           // 唯一 id，拼音
+    name:"顾媛鸾",
+    title:"",        // 封号，无则 ""
+    rank:"皇贵妃",         // 最终位分
+    age:39,
+    origin:"京畿名门大族",
+    specialty:"歌舞",
+    entryYear:1,
+    deathYear:23,
+    favor:2177,
+    affection:1749,
+    fate:["病弱","性灵"],         // 命格，如 ["强健","仁爱"]
+    deathType:"natural",    // murdered / executed / natural / childbirth / surviving
+    killer:"",       // 无则 ""
+    sons:0, survivingSons:0,
+    daughters:2, survivingDaughters:2,
+    enemies:["云玄珞"],
+    friends:["顾语莹","林朗欢","许思兰","云诗白"],
+    clan:["gu_yu_ying"],         // 同族妃嫔 id
+    harmedBy:[
+      {by:"云玄珞",type:"染病",year:17},
+    ],     // { by:"姓名", type:"小产/染病/落水致死", year:X }
+    harmed:[],       // { to:"姓名", type:"...", year:X }
+    image:"images/顾媛鸾.jpg",        // 图片路径，如 "images/某某.jpg"，无图则留 ""
+    bio:`
+    人物简介
+顾氏，出身京畿名门大族，家族势力三千六百余，是本册所有妃嫔中家世最为显赫的一位。她入宫之初便由圣母皇太后亲自推荐，起点之高，无人能及——不以答应起步，不以常在起步，以夫人之名入宫，是帝登基之初太后为他择定的人选。
+容貌倾国倾城，歌舞出色，才智六分，意志百折不挠，野心荣华富贵八分，命格病弱、性灵。她生性内敛，爱争宠，帝起初觉她"嚣张"，后来又说她文化水平高了，孩子属性都好——是一个在岁月和宫廷中真实成长过的人。
+好感一千七百四十九，她对帝有深切的情感，至死仍渴望帝王的心，只是那颗心，她从未真正完整地拥有过。
+二十二年，皇贵妃，宫中位分最高的女子之一，无封号，无帝陪伴的晚年，最后六年缠绵病榻，无人过问。
+她的性情末年已是：自闭，绝望，对老去的焦虑，对身体的痛苦，对帝王心的渴求，从未放弃，直到辞世。
+
+编年经历
+逸康元年正月初三，顾媛鸾以夫人之位入宫，时年约十七岁。同日入宫的，还有[[沈怡巧]]——[[沈怡巧]]封答应，她封夫人，太后的推荐，在第一天就将她置于截然不同的起点。
+入宫七个月，逸康元年八月初八，有孕。
+逸康二年五月初三，诞下公主周依一珑——帝登基以来的第一位公主，长公主。帝当日将她晋封为皇贵妃，自夫人直跨至宫中仅次于皇后的最高位分，再无可晋之处。她二十岁不到，已在了最高的位置上，此后二十余年，位分从未动过，因为没有地方可以再动了。
+此后三年平稳，帝对她颇为宠爱，尤其在中宫皇后久久无孕的岁月里，她是宫中最受重视的女子。宠幸一百一十七次，年均约五次余，情分积累至两千余，以入宫年限而言并不算密集，却也是稳定的存在。
+逸康五年七月，第二次有孕。
+逸康六年三月，生产。
+这一次，几乎要了她的命。
+产程漫长而危险，接连出现多次险情，太医彻夜守候，孩子几度岌岌可危，她自己亦数度徘徊生死之间。最终，公主周依七丽落地，太医们将孩子保住了——孩子保住了，而她，从此再也无法生育。
+公主七丽出生时已先天体弱，日后亦一直身体不好，帝说她"聪明有主见的孩子"，那份聪慧，是用她母亲的生育能力换来的。
+难产之后，顾媛鸾的身体便不再是从前的身体了。宠幸仍在延续，情分仍在积累，但不能再孕，是这个时代宫廷里对一个妃嫔最关键的失去。帝之后说"圣宠渐衰"，或许正是从那一次生产之后，便开始了。
+逸康六年至逸康十七年，漫长的十一年。她以皇贵妃之位居于宫中，位分无人可及，却也无处可去。宫中新人不断涌入，[[云玄珞]]盛宠长达十余年，[[完颜昭媚]]四季宠妃，[[沈怡巧]]百折不挠一路生子——她看着这一切，带着那份"对帝王心的渴求"，越来越深地沉入内敛与自闭之中。
+逸康十七年三月十三日，[[云玄珞]]出手，令她突染疾病。
+彼时[[云玄珞]]正是杀伐最为密集的一年——同年她毒害了顾媛鸾、麦尼修、欧阳仁幽、黎则曦、穆莱德，水中推走了王婉蓁，腹中同时怀着她唯一的儿子。顾媛鸾是那一年众多受害者之一，所中之毒叠在已然不稳的病弱命格之上，从此一病六年，再未真正康复。
+帝说："后几年她一直生病，我也没管过，最后病死。"
+这句话，他说得平静，平静得令人心凉。
+逸康二十三年二月初一，顾媛鸾病逝，年三十九岁。
+
+推测
+她进宫时拥有这个宫廷里几乎最好的一切——太后背书、名门出身、倾国容貌、最高位分。她输掉的，是那一次生产，是她的身体，是帝王渐移的目光，最终是那六年无人问津的病榻。
+她厌恶云玄珞，那场毒害让她余生缠绵病榻；然而她真正的失落，在云玄珞出手之前便已开始了——是那次难产，是失去生育能力之后慢慢流逝的圣宠。
+她在宫中度过了二十二年，见过几乎所有人的起落，是本朝在世最久的妃嫔之一。她的两个女儿都远在封地，聪明有主见，她说长女"类己"——这或许是她晚年最清醒的一份安慰，也是她留在这世上最后的一点回响。
+她一生渴求帝王的心，渴求了二十二年，直到最后仍未放手。
+
+结语
+逸康二十三年二月初一，顾媛鸾，年三十九，以皇贵妃位病逝。在宫二十二年，无封号，留公主周依一珑、周依七丽于封地。太后所荐，皇贵妃二十一年，一病六载，无人过问，独自离世。`,
+    judgment:
+    `太后荐入夫人班，长女头生皇贵攀。
+难产一朝绝生育，云氏毒手病六年。
+圣宠渐衰无人问，倾国容颜老病间。`,
+  },
+
+  // ══════════════════════════════════════
+  // 阮靖雪
+  // ══════════════════════════════════════
+  {
+    id:"ruan_jing_xue",           // 唯一 id，拼音
+    name:"阮靖雪",
+    title:"雪",        // 封号，无则 ""
+    rank:"妃",         // 最终位分
+    age:38,
+    origin:"吴地名门大族",
+    specialty:"刺绣",
+    entryYear:2,
+    deathYear:23,
+    favor:1686,
+    affection:1337,
+    fate:["桃花"],         // 命格，如 ["强健","仁爱"]
+    deathType:"natural",    // murdered / executed / natural / childbirth / surviving
+    killer:"",       // 无则 ""
+    sons:1, survivingSons:0,
+    daughters:1, survivingDaughters:1,
+    enemies:["云玄珞"],
+    friends:["冯君珑","黎建笙","许思兰","梁婉墨"],
+    clan:[],         // 同族妃嫔 id
+    harmedBy:[
+      {by:"云玄珞",type:"染病",year:22},
+    ],     // { by:"姓名", type:"小产/染病/落水致死", year:X }
+    harmed:[],       // { to:"姓名", type:"...", year:X }
+    image:"images/阮靖雪.jpg",        // 图片路径，如 "images/某某.jpg"，无图则留 ""
+    bio:`
+    人物简介
+阮氏，出身吴地名门大族，家族曾有显赫之名，然家势至入宫时已趋弱小，这份忧虑伴随她二十一年，从未真正放下。她容貌倾国倾城，擅刺绣，才艺出众，七夕宫中比赛频频夺冠。性情强势，意志却畏缩，是一个外强内怯的人——能主动向帝开口要晋封，却在大事上往往不够坚决。
+才智七分，道德心地善良，交际左右逢源，野心荣华富贵六分，命格桃花。帝见她时，以"我见犹怜"四字定了她的入宫缘由——那是一种温柔的怜爱，带着几分心疼，几分柔情，不全是欣赏，更像是被她触动了什么。
+好感一千三百三十七，她对帝有真实的情感，却不如帝对她深重；宠爱一千六百八十六，盛宠之列，帝对她始终留有情分，只是那份情分，随着岁月流逝，慢慢变成了一种平稳的存在。
+封号"雪"——是她自己开口要来的那一天一并赐下的。
+
+编年经历
+逸康二年正月初二，阮靖雪入宫，封为美人，以"我见犹怜"之由越过答应起步，时年约十七岁。入宫仅两个月，三月初六便已有孕，晋为贵人。帝后来说她"好命，两次就有了"，说的便是这份来得极快的好孕。
+逸康二年十二月初三，诞下皇子周允二潜，晋为小仪。那是帝的第二位皇子，落地之时，或许曾寄予厚望。
+逸康四年三月，二皇子夭折，年不足两岁。
+此后的晋封，皆靠岁月积累：逸康三年晋嫔，逸康四年晋婉仪，逸康六年晋容华，每一步之间隔着少则一年、多则两年的久侍光阴，宫中的日子平稳而漫长。
+逸康九年三月，再度有孕，晋为婕妤。十二月，诞下公主周依十一惠，晋为贵嫔。儿子没能留住，女儿留下了，聪明而有主见，帝说她懒惰，她疼爱至深，盼她生活幸福。
+逸康十二年八月初三，她向帝开口，请了自己的晋封。
+这件事，在宫中所有的晋封记录里几乎是唯一一笔——档案上写着"因自己要的"。她以强势的性情走到帝面前，说她要升一级，帝给了。昭仪，同日赐号"雪"，那个字，是她那一天一并带回来的。帝私下说她"有点作"，然而仍然给了，这大约便是他们之间那段情分最真实的模样。
+此后七年，位分未动。逸康十九年十二月初五，以久侍宫廷晋为妃，彼时她已在宫中近十八年。
+她不喜欢兰林殿，这是帝知晓的事。入宫多年，她的性情里始终带着一点任性，带着一点"作"，帝包容着，也未曾格外在意。七夕宫中刺绣比赛，她频频夺冠，与同样以针线见长的[[周广怡]]在各自的岁月里各胜一时，是宫中极少数以才艺真正赢得声名的人。
+逸康二十二年七月，[[云玄珞]]自皇姑寺归来，一个月后，八月十一日，阮靖雪突染疾病，系云玄珞所为，同日被毒害的还有她的友人[[许思兰]]。云玄珞归宫不足两月，这是她第一批出手的目标。
+从逸康二十二年八月，到逸康二十三年九月，漫长的十三个月，她始终缠绵病榻，再未康复。
+这段日子里，她搬离了兰林殿，迁入新居。新居原是宫中另一位女子的旧所——[[云诗白]]，云玄珞的妹妹。她在那个陌生的宫室里适应，思索着前任主人的故事，那个与她无直接纠葛却又奇异地与她命运相连之人的故事——害了她的人的姐姐，曾在她将死之地度过自己的岁月。
+逸康二十三年九月初一，阮靖雪病逝，年三十八。
+
+推测
+桃花命格，映在她身上，不是出轨与风流，而是一种情感上的牵引——帝"我见犹怜"而将她带回，这份怜爱本身便带着桃花的色彩。她被情感深深牵绊，对帝有真实的感情，却始终知道那份感情并不完全对等。好感低于宠爱的数字，是她内心某种清醒的注脚。
+她有领袖气质，有强势的表面，却在根本处畏缩。她会去要昭仪，会不喜欢兰林殿，会在小事上坚持自己，却在生死、在病榻、在宫室更替的命运前，只剩下"即将辞世的绝望"和"对年龄的焦虑"。
+二十一年，宫中见过了太多。她死前躺在[[云诗白]]住过的地方，思索着那个女人的故事，而那个女人的姐姐，是令她病死在此处的人。
+
+结语
+逸康二十三年九月初一，阮靖雪，封号雪，年三十八，以妃位病逝。在宫二十一年，留公主周依十一惠于封地，七夕针线无人再争，那枚封号，是她自己开口讨来的，也是她留在宫中最清晰的一笔。
+`,
+    judgment:
+    `太吴地才女帝犹怜，桃花命格入宫关。
+自请昭仪封号雪，七夕刺绣岁岁冠。
+云氏毒手病经年，旧主宫室思苍天。`,
+  },
+
+  // ══════════════════════════════════════
+  // 沈菀惠
+  // ══════════════════════════════════════
+  {
+    id:"shen_wan_hui",           // 唯一 id，拼音
+    name:"沈菀惠",
+    title:"倩",        // 封号，无则 ""
+    rank:"妃",         // 最终位分
+    age:38,
+    origin:"吴地仕宦之家 晋地刺史沈明容之女",
+    specialty:"骑射",
+    entryYear:4,
+    deathYear:24,
+    favor:1733,
+    affection:1365,
+    fate:[],         // 命格，如 ["强健","仁爱"]
+    deathType:"natural",    // murdered / executed / natural / childbirth / surviving
+    killer:"",       // 无则 ""
+    sons:3, survivingSons:0,
+    daughters:1, survivingDaughters:0,
+    enemies:["顾夏夏","云玄珞"],
+    friends:[],
+    clan:[],         // 同族妃嫔 id
+    harmedBy:[
+      {by:"顾夏夏",type:"染病",year:24},
+    ],     // { by:"姓名", type:"小产/染病/落水致死", year:X }
+    harmed:[
+      {to:"顾夏夏",type:"小产",year:12},
+      {to:"顾夏夏",type:"染病",year:15},
+      {to:"麦尼修",type:"小产",year:19},
+      {to:"黎则曦",type:"落水致死",year:19},
+      {to:"穆昭幽",type:"小产",year:20},
+      {to:"顾夏夏",type:"染病",year:22},
+    ],       // { to:"姓名", type:"...", year:X }
+    image:"images/沈菀惠.jpg",        // 图片路径，如 "images/某某.jpg"，无图则留 ""
+    bio:`
+    人物简介
+沈氏，出身吴地仕宦之家，父为晋地刺史沈明容，家族势力不弱。帝见她时，觉她"温婉可人"——然而那只是她的容貌给出的答案，与她的实际性情相去甚远。她风华绝代，骑射出众，是宫中极少数以武艺见长的妃嫔，那份冷淡的底色，大约在宫门关上的第一天便在了，只是帝迟迟未看透。
+道德心如蛇蝎，评分为零，是本朝最低；性情冷淡，意志百折不挠九分；交际人见人厌，命格为空。
+她一生有四个孩子，无一活到成年。她与一个叫[[顾夏夏]]的女人打了将近十二年，最终死在对方的反击之下。
+帝对她的印象是"很美丽，也爱争宠"，言简意赅，亦无深情。宠爱一千七百三十三，盛宠之列，好感一千三百六十五，她对帝有真实的情分，却从未将那份情分变成她停手的理由。
+心境末年：孤僻，沉着冷静，阴狠，对年龄焦虑，病体痛苦，即将辞世的绝望。
+
+编年经历
+逸康四年四月初三，沈菀惠入宫，封为常在，时年约十六岁。入宫五个月，九月有孕，晋为美人。逸康五年六月初五，诞下皇子周允五毓，翌日晋为贵人。
+此后七年平稳，位分靠岁月积累，宠幸延续，情分渐厚。
+逸康十年七月，周允五毓夭折，约五岁。
+逸康十二年五月，第二次有孕，晋为小仪。同年六月，她出手加害[[顾夏夏]]，致其小产，记过，未受处罚。这是她与[[顾夏夏]]之间第一次动手，也是此后十二年你来我往的血仇起点。
+逸康十三年二月初五，诞下皇子周允十七宸，晋为嫔。
+逸康十四年四月，上季宠妃。六月，[[顾夏夏]]反击，令她突染疾病。她带病在七月再度有孕，晋为婉仪，然而三日后小产，身体虚弱所致。九月，周允十七宸夭折，年不足两岁。一年之内，染病、小产、失子，三击接连落下。
+同年十月，她再度上了季宠妃。那份争宠的本能，从未因失去而真正消歇。
+逸康十五年一月，她第二次对[[顾夏夏]]出手，毒害，记过。六月，再次有孕，晋为容华。逸康十六年三月，公主周依二十四巧出生，当日她同时毒害了[[顾夏夏]]，晋为婕妤。八月，再度有孕，晋为贵嫔。十一月，第三次毒害[[顾夏夏]]。
+逸康十七年五月初六，皇子周允二十四文出生，晋为昭仪。
+逸康十八年九月，经查，是[[云玄珞]]毒害了周允二十四文。十月，周允二十四文夭折，约十七个月。她的第三个孩子，死于宫中另一双手。
+十二月，她第五次有孕，晋为妃。
+逸康十九年正月初二，帝赐封号"倩"。
+两日后，正月初四，小产。
+封号赐下两天，孩子便没了。她以妃位、以"倩"之名，留在了一个已经没有孩子的位置上。
+此后两个月，她连续出手：二月，令[[麦尼修]]小产，虚弱而亡；四月，令[[黎则曦]]落水身亡。两条人命，接连落在逸康十九年的开头。
+五月，禁足。
+逸康二十年一月，又害[[穆昭幽]]小产，记过，被宣判永久禁足。
+三年二个月，她在禁足中度过。逸康二十二年五月，周依二十四巧夭折，约六岁。她四个孩子，至此一个不剩。
+逸康二十二年七月，禁足解除。同年十一月，她第四次毒害[[顾夏夏]]，记过。
+禁足三年，出来第一件事，仍是那个名字。
+逸康二十四年二月十八日，[[顾夏夏]]出手，令她突染疾病。
+逸康二十四年五月初一，病逝，年三十六。
+
+推测
+她与[[顾夏夏]]的仇，从逸康十二年起，到逸康二十四年终，跨越十二年，五次加害，两次被反击，最后一次被反击时，没能再撑起来。是她先动的手，[[顾夏夏]]还了手，她再动手，[[顾夏夏]]又还了手——直到最后那一次，再也没有人还得了。
+帝曾说她爱争宠，这是真的。她以骑射之姿入宫，以温婉之容迷惑人，以冷淡之心驾驭一切，却从未真正学会停下来。[[云玄珞]]杀了她的儿子，她没有还手；[[顾夏夏]]是她选中的仇人，十二年，无论被惩戒、被禁足、被永久圈禁，解禁后的第一刀仍然落在同一个地方。
+她有百折不挠的意志，却用来延续一场注定两败俱伤的仇恨。四个孩子无一留存，命格为无，一切自取，最终死在那个被她伤了四次的人的手里。
+
+结语
+逸康二十四年五月初一，沈菀惠，封号倩，年三十六，以妃位病逝，系[[顾夏夏]]加害所致。在宫二十年，四子女皆先她而去，无子嗣留存，无哀荣。倩号赐下两日便失孕，骑射绝色，终归尘土。
+`,
+    judgment:
+    `温婉入宫帝心倾，骑射风华实冷情。
+子女尽失仇顾氏，十年积恨两相凌。
+倩号两日胎复失，孤僻阴狠入幽冥。`,
+  },
   /*
   ══════════════════════════════════════
   【空白模板】新增妃子时复制此块
@@ -762,7 +1307,7 @@ const concubines = [
     favor:0,
     affection:0,
     fate:[],         // 命格，如 ["强健","仁爱"]
-    deathType:"",    // murdered / executed / natural / childbirth
+    deathType:"",    // murdered / executed / natural / childbirth / surviving
     killer:"",       // 无则 ""
     sons:0, survivingSons:0,
     daughters:0, survivingDaughters:0,
@@ -786,16 +1331,30 @@ const concubines = [
 const YEAR_MIN = 1, YEAR_MAX = 20;
 const YEARS = Array.from({length: YEAR_MAX - YEAR_MIN + 1}, (_,i) => i + YEAR_MIN);
 
-const DEATH_LABEL = {murdered:"被害", executed:"赐死", natural:"自然/病逝", childbirth:"难产"};
-const DEATH_COLOR = {murdered:"#8b1515", executed:"#8b5200", natural:"#2d6b4a", childbirth:"#5050c9"};
+const DEATH_LABEL = {murdered:"被害", executed:"赐死", natural:"病逝", childbirth:"难产", surviving:"存世"};
+const DEATH_COLOR = {murdered:"#8b1515", executed:"#8b5200", natural:"#3a7a9a", childbirth:"#5050c9", surviving:"#2d8b50"};
+
+const RANK_ORDER = ["皇后","皇贵妃","夫人","贵妃","妃","昭仪","贵嫔","婕妤","容华","婉仪","嫔","小仪","贵人","美人","常在","答应"];
+function rankWeight(rank){ const i=RANK_ORDER.indexOf(rank); return i===-1?-1:RANK_ORDER.length-i; }
 
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 function pct(v,max){return clamp((v/max)*100,0,100)}
 
 // ── 卡片视图 ──────────────────────────────────────────────────
 let currentFilter = null;
+let currentSort = {key:null, dir:1}; // key: entryYear | rank | deathYear; dir: 1升 -1降
+
 function renderCards(){
-  const list = currentFilter ? concubines.filter(c=>c.deathType===currentFilter) : concubines;
+  let list = currentFilter ? concubines.filter(c=>c.deathType===currentFilter) : [...concubines];
+  if(currentSort.key){
+    list = [...list].sort((a,b)=>{
+      let va,vb;
+      if(currentSort.key==="entryYear"){ va=a.entryYear; vb=b.entryYear; }
+      else if(currentSort.key==="deathYear"){ va=a.deathYear; vb=b.deathYear; }
+      else if(currentSort.key==="rank"){ va=rankWeight(a.rank); vb=rankWeight(b.rank); }
+      return (va-vb)*currentSort.dir;
+    });
+  }
   document.getElementById("cards-grid").innerHTML = list.map(c=>`
     <div class="card" onclick="openModal('${c.id}')">
       <div class="card-img-wrap">
@@ -804,7 +1363,9 @@ function renderCards(){
           : `<div class="card-ph">${c.name[0]}</div>`}
       </div>
       <div class="card-name">${c.name}${c.title?`<span style="font-size:.7em;margin-left:.25em;color:var(--gold-dim)">·${c.title}</span>`:""}</div>
-      <div class="card-sub">逸康${c.entryYear}年入宫　${c.rank}位殁　享年${c.age}岁</div>
+      <div class="card-sub">${c.deathType==="surviving"
+          ?`逸康${c.entryYear}年入宫　${c.rank}位　存世`
+          :`逸康${c.entryYear}年入宫　${c.rank}位殁　享年${c.age}岁`}</div>
       <div class="death-badge death-${c.deathType}">${DEATH_LABEL[c.deathType]}${c.killer?"　"+c.killer:""}</div>
       <div class="card-bars">
         <div class="bar-group">
@@ -823,16 +1384,49 @@ function renderCards(){
     </div>`).join("");
 }
 
+const SORT_DEFS=[["entryYear","入宫年限"],["rank","位份"],["deathYear","死亡年限"]];
+
+function sortBtnLabel(key,label){
+  if(currentSort.key!==key)return label;
+  return label+(currentSort.dir===-1?" ↓":" ↑");
+}
+
 function renderFilterBar(){
-  const btns=[["all","全部"],["murdered","被害"],["executed","赐死"],["natural","自然"],["childbirth","难产"]];
-  document.getElementById("filter-bar").innerHTML=btns.map(([v,l])=>
-    `<button class="filter-btn${v==="all"?" active":""}" onclick="setFilter('${v}',this)">${l}</button>`).join("");
+  const btns=[["all","全部"],["murdered","被害"],["executed","赐死"],["natural","病逝"],["childbirth","难产"],["surviving","存世"]];
+  document.getElementById("filter-bar").innerHTML=
+    btns.map(([v,l])=>
+      `<button class="filter-btn${v==="all"?" active":""}" onclick="setFilter('${v}',this)">${l}</button>`
+    ).join("")+
+    `<div class="sort-group">`+
+    SORT_DEFS.map(([k,l])=>
+      `<button class="filter-btn" id="sort-btn-${k}" onclick="setSort('${k}')">${sortBtnLabel(k,l)}</button>`
+    ).join("")+
+    `</div>`;
 }
 
 function setFilter(v,btn){
   document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
   currentFilter = v==="all"?null:v;
+  // 恢复当前排序按钮的 active 状态
+  if(currentSort.key) document.getElementById("sort-btn-"+currentSort.key)?.classList.add("active");
+  renderCards();
+}
+
+function setSort(key){
+  if(currentSort.key===key){
+    currentSort.dir*=-1;
+  } else {
+    currentSort.key=key;
+    currentSort.dir=-1; // 首次点击：晚→早 / 高→低
+  }
+  // 更新按钮标签和 active 状态
+  SORT_DEFS.forEach(([k,l])=>{
+    const b=document.getElementById("sort-btn-"+k);
+    if(!b)return;
+    b.classList.toggle("active",k===currentSort.key);
+    b.textContent=sortBtnLabel(k,l);
+  });
   renderCards();
 }
 
@@ -845,14 +1439,16 @@ function renderTimeline(){
   const axis=`<div class="tl-axis">${YEARS.map(y=>`<div class="yr">逸康${y}</div>`).join("")}</div>`;
   const rows=concubines.map(c=>{
     const s=((c.entryYear-YEAR_MIN)/total)*100;
-    const e=((c.deathYear-YEAR_MIN)/total)*100;
+    const surviving=c.deathType==="surviving";
+    const eYear=surviving?YEAR_MAX:c.deathYear;
+    const e=((eYear-YEAR_MIN)/total)*100;
     const w=Math.max(e-s,.4);
     return `<div class="tl-row" onclick="openModal('${c.id}')">
       <div class="tl-lbl">${c.name}</div>
       <div class="tl-track">
         <div class="tl-bar ${c.deathType}" style="left:${s}%;width:${w}%"></div>
         <div class="tl-dot-s" style="left:${s}%"></div>
-        <div class="tl-dot-e ${c.deathType}" style="left:${e}%"></div>
+        ${surviving?"":`<div class="tl-dot-e ${c.deathType}" style="left:${e}%"></div>`}
       </div></div>`;
   }).join("");
   inner.innerHTML=axis+`<div class="tl-rows">${rows}</div>`;
@@ -931,7 +1527,7 @@ function renderNetwork(){
   }
 
   const EC={kill:"rgba(139,21,21,.85)",harm:"rgba(139,80,0,.6)",friend:"rgba(45,107,74,.8)",clan:"rgba(201,164,68,.35)"};
-  const NC={murdered:"#8b1515",executed:"#8b5200",natural:"#2d6b4a",childbirth:"#5050c9"};
+  const NC={murdered:"#8b1515",executed:"#8b5200",natural:"#3a7a9a",childbirth:"#5050c9",surviving:"#2d8b50"};
 
   function draw(){
     ctx.clearRect(0,0,W,H);
@@ -962,6 +1558,40 @@ function renderNetwork(){
   let fr=0;
   function loop(){for(let i=0;i<3;i++)tick();draw();fr++;if(fr<220)requestAnimationFrame(loop);}
   loop();
+
+  // ── 节点交互：悬停预览卡片 & 点击打开详情 ──
+  function nodeAt(clientX,clientY){
+    const rect=canvas.getBoundingClientRect();
+    const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height;
+    const mx=(clientX-rect.left)*scaleX, my=(clientY-rect.top)*scaleY;
+    for(const n of nodes){
+      if(n.type!=="concubine")continue;
+      if((mx-n.x)**2+(my-n.y)**2<=(6+5)**2)return n;
+    }
+    return null;
+  }
+  canvas.addEventListener("mousemove",e=>{
+    const n=nodeAt(e.clientX,e.clientY);
+    if(n){
+      canvas.style.cursor="pointer";
+      const c=concubines.find(c=>c.name===n.id);
+      if(c)showTooltip(e,c.id);
+    }else{
+      canvas.style.cursor="default";
+      hideTooltip();
+    }
+  });
+  canvas.addEventListener("mouseleave",()=>{
+    canvas.style.cursor="default";
+    hideTooltip();
+  });
+  canvas.addEventListener("click",e=>{
+    const n=nodeAt(e.clientX,e.clientY);
+    if(n){
+      const c=concubines.find(c=>c.name===n.id);
+      if(c)openModal(c.id);
+    }
+  });
 }
 
 // ── Modal ─────────────────────────────────────────────────────
@@ -976,7 +1606,7 @@ function showTooltip(e, id){
       ${imgHtml}
       <div style="min-width:0">
         <div style="color:#c9a444;font-size:.82rem;letter-spacing:.1em;margin-bottom:.2rem">${c.name}${c.title?`·${c.title}`:''}</div>
-        <div style="color:#7a6848;font-size:.6rem;line-height:1.8">${c.rank}位　享年${c.age}岁</div>
+        <div style="color:#7a6848;font-size:.6rem;line-height:1.8">${c.rank}位${c.deathType==="surviving"?"　存世":`　享年${c.age}岁`}</div>
         <div style="color:#7a6848;font-size:.6rem">${DEATH_LABEL[c.deathType]}${c.killer?'　'+c.killer:''}</div>
         ${c.judgment?`<div style="color:#7a6848;font-size:.58rem;margin-top:.35rem;padding-top:.35rem;border-top:1px solid rgba(201,164,68,.12);line-height:1.85;white-space:pre-line">${c.judgment.split('\n').slice(0,2).join('\n')}</div>`:''}
       </div>
@@ -1010,8 +1640,9 @@ function openModal(id){
   }
   document.getElementById("m-name").innerHTML=
     c.name+(c.title?`<span style="font-size:.65em;margin-left:.3em;color:var(--gold-dim)">·${c.title}</span>`:"");
-  document.getElementById("m-meta").textContent=
-    `逸康${c.entryYear}年入宫　逸康${c.deathYear}年殁　享年${c.age}岁　${c.rank}位　${DEATH_LABEL[c.deathType]}${c.killer?"（"+c.killer+"）":""}`;
+  document.getElementById("m-meta").textContent= c.deathType==="surviving"
+    ? `逸康${c.entryYear}年入宫　${c.rank}位　存世`
+    : `逸康${c.entryYear}年入宫　逸康${c.deathYear}年殁　享年${c.age}岁　${c.rank}位　${DEATH_LABEL[c.deathType]}${c.killer?"（"+c.killer+"）":""}`;
   document.getElementById("m-grid").innerHTML=[
     ["宠爱",c.favor],["好感",c.affection],
     ["命格",c.fate.length?c.fate.join("·"):"无"],
