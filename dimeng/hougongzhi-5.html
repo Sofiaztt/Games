@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>帝梦·后宫志</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #080604;
+  --gold: #c9a444;
+  --gold-dim: #7a6128;
+  --crimson: #8b1515;
+  --crimson-dim: #4a0d0d;
+  --jade: #2d6b4a;
+  --text: #d4b896;
+  --text-dim: #7a6848;
+  --card-bg: #110d09;
+  --border: rgba(201,164,68,0.18);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font-family:'Noto Serif SC',serif;min-height:100vh;
+  background-image:radial-gradient(ellipse at 50% 0%,rgba(139,21,21,0.07) 0%,transparent 55%)}
+
+/* ── Header ── */
+header{text-align:center;padding:2.5rem 1rem 1.5rem;border-bottom:1px solid var(--border);position:relative}
+h1{font-size:2rem;font-weight:300;letter-spacing:.5em;color:var(--gold);text-shadow:0 0 40px rgba(201,164,68,.25)}
+.subtitle{font-size:.7rem;letter-spacing:.3em;color:var(--text-dim);margin-top:.4rem}
+
+/* ── Nav ── */
+nav{display:flex;justify-content:center;border-bottom:1px solid var(--border)}
+.tab{padding:.75rem 2.2rem;cursor:pointer;font-size:.8rem;letter-spacing:.2em;color:var(--text-dim);
+  border:none;border-bottom:2px solid transparent;background:none;font-family:'Noto Serif SC',serif;transition:all .25s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* ── Views ── */
+.view{display:none;padding:1.8rem}
+.view.active{display:block}
+
+/* ── Filter ── */
+.filter-bar{display:flex;gap:.5rem;flex-wrap:wrap;max-width:1200px;margin:0 auto 1.4rem}
+.filter-btn{font-size:.62rem;padding:.25rem .7rem;border:1px solid var(--border);background:none;
+  color:var(--text-dim);cursor:pointer;letter-spacing:.1em;font-family:'Noto Serif SC',serif;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{border-color:var(--gold-dim);color:var(--gold)}
+
+/* ── Cards ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:1.1rem;max-width:1200px;margin:0 auto}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:2px;padding:1.3rem;cursor:pointer;
+  transition:all .25s;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--crimson),transparent);opacity:0;transition:opacity .3s}
+.card:hover{border-color:rgba(201,164,68,.35);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.card:hover::before{opacity:1}
+.card-name{font-size:1.1rem;font-weight:500;color:var(--gold);letter-spacing:.1em;margin-bottom:.15rem}
+.card-sub{font-size:.68rem;color:var(--text-dim);letter-spacing:.12em;margin-bottom:.6rem}
+.death-badge{display:inline-block;font-size:.58rem;padding:.12rem .45rem;letter-spacing:.1em;margin-bottom:.65rem}
+.death-murdered{background:rgba(139,21,21,.25);color:#c97070;border:1px solid rgba(139,21,21,.45)}
+.death-executed{background:rgba(80,40,0,.25);color:#c9a070;border:1px solid rgba(139,80,0,.45)}
+.death-natural{background:rgba(20,60,90,.25);color:#70b0c9;border:1px solid rgba(20,90,130,.45)}
+.death-childbirth{background:rgba(40,40,80,.25);color:#9090c9;border:1px solid rgba(40,40,120,.45)}
+.death-surviving{background:rgba(20,80,45,.25);color:#70c990;border:1px solid rgba(20,120,60,.45)}
+.card-bars{display:flex;gap:.8rem;margin-bottom:.7rem}
+.bar-group{flex:1;text-align:center}
+.bar-label{font-size:.52rem;color:var(--text-dim);letter-spacing:.08em;display:block;margin-bottom:.2rem}
+.bar-track{height:2px;background:rgba(255,255,255,.05);border-radius:1px;overflow:hidden;margin-bottom:.15rem}
+.bar-fill{height:100%;border-radius:1px}
+.bar-fill.fv{background:var(--crimson)}
+.bar-fill.af{background:var(--jade)}
+.bar-val{font-size:.58rem;color:var(--text-dim)}
+.fate-row{margin-bottom:.6rem}
+.fate-tag{display:inline-block;font-size:.56rem;border:1px solid rgba(201,164,68,.15);
+  padding:.03rem .28rem;margin:.08rem;color:var(--gold-dim)}
+.card-lines{margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);
+  font-size:.62rem;color:var(--text-dim);line-height:1.85;white-space:pre-line;letter-spacing:.05em}
+
+/* ── 图片 ── */
+.card-img-wrap{width:100%;aspect-ratio:2/3;overflow:hidden;margin-bottom:.9rem;position:relative;
+  border:1px solid var(--border);background:#0c0906}
+.card-img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;
+  transition:transform .4s ease}
+.card:hover .card-img{transform:scale(1.04)}
+.card-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:2rem;color:var(--gold-dim);letter-spacing:.1em;font-weight:300;
+  background:linear-gradient(180deg,rgba(201,164,68,.06) 0%,rgba(0,0,0,.2) 100%)}
+.card-img-wrap::after{content:'';position:absolute;bottom:0;left:0;right:0;height:35%;
+  background:linear-gradient(0deg,var(--card-bg) 0%,transparent 100%);pointer-events:none}
+
+/* Modal 顶部 flex 布局 */
+.modal-top{display:flex;gap:1.4rem;margin-bottom:1.3rem;padding-bottom:1.3rem;
+  border-bottom:1px solid var(--border)}
+.modal-img-wrap{width:120px;flex-shrink:0;aspect-ratio:2/3;overflow:hidden;
+  border:1px solid var(--border);background:#0c0906;align-self:flex-start}
+.modal-img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.modal-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;color:var(--gold-dim);font-weight:300}
+.modal-top-info{flex:1;min-width:0}
+
+/* ── Timeline ── */
+.tl-wrap{overflow-x:auto;padding-bottom:1rem}
+.tl-inner{min-width:860px;padding:.5rem 1rem}
+.tl-axis{display:flex;padding-left:82px;border-bottom:1px solid var(--border);margin-bottom:1.6rem;padding-bottom:.4rem}
+.yr{flex:1;text-align:center;font-size:.58rem;color:var(--text-dim);letter-spacing:.05em;position:relative}
+.yr::before{content:'';position:absolute;bottom:-.4rem;left:50%;width:1px;height:5px;background:var(--border)}
+.tl-rows{display:flex;flex-direction:column;gap:.4rem}
+.tl-row{display:flex;align-items:center;height:26px;cursor:pointer}
+.tl-row:hover .tl-bar{opacity:1}
+.tl-lbl{width:82px;font-size:.66rem;color:var(--text-dim);text-align:right;padding-right:.7rem;flex-shrink:0}
+.tl-track{flex:1;position:relative;height:100%}
+.tl-bar{position:absolute;height:9px;top:50%;transform:translateY(-50%);border-radius:1px;opacity:.65;transition:opacity .2s}
+.tl-bar.murdered{background:linear-gradient(90deg,var(--crimson-dim),var(--crimson))}
+.tl-bar.executed{background:linear-gradient(90deg,#4a2800,#8b5200)}
+.tl-bar.natural{background:linear-gradient(90deg,#1a3a50,#3a7a9a)}
+.tl-bar.surviving{background:linear-gradient(90deg,#1a4025,#2d8b50)}
+.tl-bar.childbirth{background:linear-gradient(90deg,#1a1a50,#3a3a8b)}
+.tl-dot-s{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--gold-dim);top:50%;transform:translateY(-50%)}
+.tl-dot-e{position:absolute;width:7px;height:7px;border-radius:50%;top:50%;transform:translateY(-50%)}
+.tl-dot-e.murdered{background:var(--crimson);box-shadow:0 0 5px var(--crimson)}
+.tl-dot-e.executed{background:#8b5200}
+.tl-dot-e.natural{background:#3a7a9a}
+.tl-dot-e.surviving{background:#2d8b50}
+.tl-dot-e.childbirth{background:#5050c9}
+.legend{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:1.4rem;max-width:860px;margin-left:auto;margin-right:auto}
+.leg-item{display:flex;align-items:center;gap:.35rem;font-size:.62rem;color:var(--text-dim)}
+.leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ── Sort group ── */
+.sort-group{display:flex;gap:.5rem;align-items:center;margin-left:auto;
+  padding-left:.85rem;border-left:1px solid var(--border)}
+
+/* ── Network ── */
+#net-canvas{display:block;width:100%;max-width:900px;margin:0 auto;cursor:default}
+.net-legend{display:flex;gap:1.2rem;justify-content:center;margin-top:.8rem;flex-wrap:wrap}
+.net-leg-item{display:flex;align-items:center;gap:.35rem;font-size:.62rem;color:var(--text-dim)}
+.net-leg-line{width:22px;height:2px}
+
+/* ── Modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100;overflow-y:auto;padding:2rem}
+.modal-overlay.active{display:flex;align-items:flex-start;justify-content:center}
+.modal{background:var(--card-bg);border:1px solid var(--border);max-width:660px;width:100%;
+  padding:2.2rem;position:relative;border-radius:2px;margin:auto}
+.modal::before{content:'';position:absolute;top:0;left:2rem;right:2rem;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.modal-x{position:absolute;top:.9rem;right:1.1rem;background:none;border:none;
+  color:var(--text-dim);font-size:1.1rem;cursor:pointer;font-family:'Noto Serif SC',serif;transition:color .2s}
+.modal-x:hover{color:var(--gold)}
+.modal-name{font-size:1.5rem;font-weight:300;color:var(--gold);letter-spacing:.3em;margin-bottom:.25rem}
+.modal-meta{font-size:.72rem;color:var(--text-dim);letter-spacing:.15em;margin-bottom:1.3rem}
+.modal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-bottom:1.3rem;
+  padding-bottom:1.3rem;border-bottom:1px solid var(--border)}
+.m-stat{text-align:center;padding:.5rem;background:rgba(255,255,255,.02);border:1px solid var(--border)}
+.m-stat-l{font-size:.5rem;color:var(--text-dim);letter-spacing:.15em;display:block;margin-bottom:.25rem}
+.m-stat-v{font-size:.88rem;color:var(--text)}
+.modal-bio{font-size:.82rem;line-height:2.05;color:var(--text);white-space:pre-wrap;margin-bottom:1.3rem}
+.modal-jd{padding:.9rem;border-left:2px solid var(--gold-dim);background:rgba(201,164,68,.04);
+  font-size:.76rem;line-height:2.2;color:var(--text-dim);white-space:pre-line;letter-spacing:.05em}
+.bio-link{
+  color: #e8c870;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(232,200,112,0.4);
+  text-underline-offset: 3px;
+  transition: text-decoration-color .2s;
+}
+.bio-link:hover{
+  text-decoration-color: #e8c870;
+}
+#bio-tooltip{
+  position:fixed;z-index:200;display:none;pointer-events:none;
+  background:#110d09;border:1px solid rgba(201,164,68,.3);
+  padding:.7rem;max-width:200px;
+  box-shadow:0 8px 24px rgba(0,0,0,.65);
+  font-family:'Noto Serif SC',serif;
+}
+#bio-tooltip::before{content:'';position:absolute;top:0;left:1rem;right:1rem;
+  height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>帝　梦　·　后　宫　志</h1>
+  <p class="subtitle">逸康年间　后妃档案</p>
+</header>
+
+<nav>
+  <button class="tab active" onclick="switchView('cards',this)">人 物 览</button>
+  <button class="tab" onclick="switchView('timeline',this)">时 间 轴</button>
+  <button class="tab" onclick="switchView('network',this)">关 系 图</button>
+</nav>
+
+<div id="view-cards" class="view active">
+  <div class="filter-bar" id="filter-bar"></div>
+  <div class="cards-grid" id="cards-grid"></div>
+</div>
+
+<div id="view-timeline" class="view">
+  <div class="legend" id="tl-legend"></div>
+  <div class="tl-wrap"><div class="tl-inner" id="tl-inner"></div></div>
+</div>
+
+<div id="view-network" class="view">
+  <canvas id="net-canvas" height="540"></canvas>
+  <div class="net-legend">
+    <div class="net-leg-item"><div class="net-leg-line" style="background:#8b1515"></div>致死</div>
+    <div class="net-leg-item"><div class="net-leg-line" style="background:rgba(139,80,0,.8)"></div>加害</div>
+    <div class="net-leg-item"><div class="net-leg-line" style="background:#2d6b4a"></div>交好</div>
+    <div class="net-leg-item"><div class="net-leg-line" style="background:rgba(96, 189, 226, 0.4)"></div>族亲</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal" onclick="modalBgClick(event)">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <div class="modal-top">
+      <div class="modal-img-wrap" id="m-img-wrap">
+        <div class="modal-ph" id="m-ph">？</div>
+      </div>
+      <div class="modal-top-info">
+        <div class="modal-name" id="m-name"></div>
+        <div class="modal-meta" id="m-meta"></div>
+        <div class="modal-grid" id="m-grid"></div>
+      </div>
+    </div>
+    <div class="modal-bio" id="m-bio"></div>
+    <div class="modal-jd" id="m-jd"></div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   后宫志 · 空白模板
+   使用方法：在下面的 concubines 数组中填入妃子数据即可
+   字段说明见下方注释
+================================================================ */
+
+// ── 非妃嫔节点（一般不需要修改）──────────────────────────────
+const others = [
+  { id:"emperor", name:"帝", type:"emperor" },
+];
+
+// ── 妃嫔数据 ────────────────────────────────────────────────
+// 在这里添加你的妃子数据，按以下格式：
+// {
+//   id:"", name:"", title:"", rank:"", age:0, origin:"", specialty:"",
+//   entryYear:0, deathYear:0, favor:0, affection:0, fate:[],
+//   deathType:"surviving", killer:"",
+//   sons:0, survivingSons:0, daughters:0, survivingDaughters:0,
+//   enemies:[], friends:[], clan:[],
+//   harmedBy:[], harmed:[],
+//   image:"", bio:``, judgment:``,
+// },
+const concubines = [
+  // 在这里添加你的新妃子数据
+];
+
+// ================================================================
+// 渲染逻辑（不需要修改）
+// ================================================================
+
+const YEAR_MIN = 1, YEAR_MAX = 20;
+const YEARS = Array.from({length: YEAR_MAX - YEAR_MIN + 1}, (_,i) => i + YEAR_MIN);
+
+const DEATH_LABEL = {murdered:"被害", executed:"赐死", natural:"病逝", childbirth:"难产", surviving:"存世"};
+const DEATH_COLOR = {murdered:"#8b1515", executed:"#8b5200", natural:"#3a7a9a", childbirth:"#5050c9", surviving:"#2d8b50"};
+
+const RANK_ORDER = ["皇后","皇贵妃","夫人","贵妃","妃","昭仪","贵嫔","婕妤","容华","婉仪","嫔","小仪","贵人","美人","常在","答应"];
+function rankWeight(rank){ const i=RANK_ORDER.indexOf(rank); return i===-1?-1:RANK_ORDER.length-i; }
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function pct(v,max){return clamp((v/max)*100,0,100)}
+
+// ── 卡片视图 ──────────────────────────────────────────────────
+let currentFilter = null;
+let currentSort = {key:null, dir:1};
+
+function renderCards(){
+  let list = currentFilter ? concubines.filter(c=>c.deathType===currentFilter) : [...concubines];
+  if(currentSort.key){
+    list = [...list].sort((a,b)=>{
+      let va,vb;
+      if(currentSort.key==="entryYear"){ va=a.entryYear; vb=b.entryYear; }
+      else if(currentSort.key==="deathYear"){ va=a.deathYear; vb=b.deathYear; }
+      else if(currentSort.key==="rank"){ va=rankWeight(a.rank); vb=rankWeight(b.rank); }
+      return (va-vb)*currentSort.dir;
+    });
+  }
+  document.getElementById("cards-grid").innerHTML = list.map(c=>`
+    <div class="card" onclick="openModal('${c.id}')">
+      <div class="card-img-wrap">
+        ${c.image
+          ? `<img class="card-img" src="${c.image}" alt="${c.name}" onerror="this.outerHTML='<div class=card-ph>${c.name[0]}</div>'">`
+          : `<div class="card-ph">${c.name[0]}</div>`}
+      </div>
+      <div class="card-name">${c.name}${c.title?`<span style="font-size:.7em;margin-left:.25em;color:var(--gold-dim)">·${c.title}</span>`:""}</div>
+      <div class="card-sub">${c.deathType==="surviving"
+          ?`逸康${c.entryYear}年入宫　${c.rank}位　存世`
+          :`逸康${c.entryYear}年入宫　${c.rank}位殁　享年${c.age}岁`}</div>
+      <div class="death-badge death-${c.deathType}">${DEATH_LABEL[c.deathType]}${c.killer?"　"+c.killer:""}</div>
+      <div class="card-bars">
+        <div class="bar-group">
+          <span class="bar-label">宠　爱</span>
+          <div class="bar-track"><div class="bar-fill fv" style="width:${pct(Math.max(0,c.favor),3000)}%;background:${c.favor<0?"#4a0d0d":c.favor<500?"#4a3a2a":c.favor<1500?"var(--gold-dim)":"var(--gold)"}"></div></div>
+          <span class="bar-val">${c.favor}</span>
+        </div>
+        <div class="bar-group">
+          <span class="bar-label">好　感</span>
+          <div class="bar-track"><div class="bar-fill af" style="width:${pct(Math.max(0,c.affection),3000)}%"></div></div>
+          <span class="bar-val">${c.affection}</span>
+        </div>
+      </div>
+      ${c.fate.length?`<div class="fate-row">${c.fate.map(f=>`<span class="fate-tag">${f}</span>`).join("")}</div>`:""}
+      ${c.judgment?`<div class="card-lines">${c.judgment.split("\n").slice(0,2).join("\n")} …</div>`:""}
+    </div>`).join("");
+}
+
+const SORT_DEFS=[["entryYear","入宫年限"],["rank","位份"],["deathYear","死亡年限"]];
+
+function sortBtnLabel(key,label){
+  if(currentSort.key!==key)return label;
+  return label+(currentSort.dir===-1?" ↓":" ↑");
+}
+
+function renderFilterBar(){
+  const btns=[["all","全部"],["murdered","被害"],["executed","赐死"],["natural","病逝"],["childbirth","难产"],["surviving","存世"]];
+  document.getElementById("filter-bar").innerHTML=
+    btns.map(([v,l])=>
+      `<button class="filter-btn${v==="all"?" active":""}" onclick="setFilter('${v}',this)">${l}</button>`
+    ).join("")+
+    `<div class="sort-group">`+
+    SORT_DEFS.map(([k,l])=>
+      `<button class="filter-btn" id="sort-btn-${k}" onclick="setSort('${k}')">${sortBtnLabel(k,l)}</button>`
+    ).join("")+
+    `</div>`;
+}
+
+function setFilter(v,btn){
+  document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  currentFilter = v==="all"?null:v;
+  if(currentSort.key) document.getElementById("sort-btn-"+currentSort.key)?.classList.add("active");
+  renderCards();
+}
+
+function setSort(key){
+  if(currentSort.key===key){
+    currentSort.dir*=-1;
+  } else {
+    currentSort.key=key;
+    currentSort.dir=-1;
+  }
+  SORT_DEFS.forEach(([k,l])=>{
+    const b=document.getElementById("sort-btn-"+k);
+    if(!b)return;
+    b.classList.toggle("active",k===currentSort.key);
+    b.textContent=sortBtnLabel(k,l);
+  });
+  renderCards();
+}
+
+// ── 时间轴 ────────────────────────────────────────────────────
+let tlDone=false;
+function renderTimeline(){
+  if(tlDone)return; tlDone=true;
+  const inner=document.getElementById("tl-inner");
+  const total=YEAR_MAX-YEAR_MIN+1;
+  const axis=`<div class="tl-axis">${YEARS.map(y=>`<div class="yr">逸康${y}</div>`).join("")}</div>`;
+  const rows=concubines.map(c=>{
+    const s=((c.entryYear-YEAR_MIN)/total)*100;
+    const surviving=c.deathType==="surviving";
+    const eYear=surviving?YEAR_MAX:c.deathYear;
+    const e=((eYear-YEAR_MIN)/total)*100;
+    const w=Math.max(e-s,.4);
+    return `<div class="tl-row" onclick="openModal('${c.id}')">
+      <div class="tl-lbl">${c.name}</div>
+      <div class="tl-track">
+        <div class="tl-bar ${c.deathType}" style="left:${s}%;width:${w}%"></div>
+        <div class="tl-dot-s" style="left:${s}%"></div>
+        ${surviving?"":`<div class="tl-dot-e ${c.deathType}" style="left:${e}%"></div>`}
+      </div></div>`;
+  }).join("");
+  inner.innerHTML=axis+`<div class="tl-rows">${rows}</div>`;
+  document.getElementById("tl-legend").innerHTML=
+    Object.entries(DEATH_LABEL).map(([k,v])=>
+      `<div class="leg-item"><div class="leg-dot" style="background:${DEATH_COLOR[k]}"></div>${v}</div>`).join("");
+}
+
+// ── 关系图（Canvas） ──────────────────────────────────────────
+let netDone=false;
+function renderNetwork(){
+  if(netDone)return; netDone=true;
+  const canvas=document.getElementById("net-canvas");
+  const W=canvas.offsetWidth; canvas.width=W;
+  const H=540; const ctx=canvas.getContext("2d");
+  const nodeList=[...concubines.map(c=>({id:c.name,type:"concubine",dt:c.deathType})),...others.map(o=>({id:o.name,type:o.type}))];
+  const seen=new Set();
+  const nodes=nodeList.filter(n=>{if(seen.has(n.id))return false;seen.add(n.id);return true;});
+  const edges=[];
+  concubines.forEach(c=>{
+    c.harmedBy.forEach(h=>{const fatal=h.type.includes("致死");edges.push({from:h.by,to:c.name,type:fatal?"kill":"harm"});});
+    c.harmed.forEach(h=>{const fatal=h.type.includes("致死");edges.push({from:c.name,to:h.to,type:fatal?"kill":"harm"});});
+    c.friends.forEach(f=>edges.push({from:c.name,to:f,type:"friend"}));
+    c.clan.forEach(cl=>{const target=concubines.find(x=>x.id===cl);if(target) edges.push({from:c.name,to:target.name,type:"clan"});});
+  });
+  const cx=W/2, cy=H/2, R=Math.min(W,H)*.38;
+  nodes.forEach((n,i)=>{const a=(i/nodes.length)*Math.PI*2-Math.PI/2;n.x=cx+R*Math.cos(a);n.y=cy+R*Math.sin(a);n.vx=0;n.vy=0;});
+  const nmap={}; nodes.forEach(n=>nmap[n.id]=n);
+  function tick(){
+    for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=nodes[i],b=nodes[j];const dx=b.x-a.x,dy=b.y-a.y,d=Math.max(Math.sqrt(dx*dx+dy*dy),.1);const f=1800/(d*d);a.vx-=f*dx/d;a.vy-=f*dy/d;b.vx+=f*dx/d;b.vy+=f*dy/d;}
+    edges.forEach(e=>{const a=nmap[e.from],b=nmap[e.to];if(!a||!b)return;const dx=b.x-a.x,dy=b.y-a.y,d=Math.max(Math.sqrt(dx*dx+dy*dy),.1);const f=d*.009;a.vx+=f*dx/d;a.vy+=f*dy/d;b.vx-=f*dx/d;b.vy-=f*dy/d;});
+    nodes.forEach(n=>{n.vx+=(cx-n.x)*.002;n.vy+=(cy-n.y)*.002;n.vx*=.82;n.vy*=.82;n.x=clamp(n.x+n.vx,40,W-40);n.y=clamp(n.y+n.vy,20,H-20);});
+  }
+  const EC={kill:"rgba(139,21,21,.85)",harm:"rgba(139,80,0,.6)",friend:"rgba(45,107,74,.8)",clan:"rgba(96, 189, 226, 0.8)"};
+  const NC={murdered:"#8b1515",executed:"#8b5200",natural:"#3a7a9a",childbirth:"#5050c9",surviving:"#2d8b50"};
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    edges.forEach(e=>{const a=nmap[e.from],b=nmap[e.to];if(!a||!b)return;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=EC[e.type]||"#555";ctx.lineWidth=e.type==="kill"?1.5:.8;ctx.stroke();});
+    nodes.forEach(n=>{let fill="#555";if(n.type==="concubine"){const c=concubines.find(c=>c.name===n.id);fill=c?NC[c.deathType]||"#4a3a2a":"#4a3a2a";}else if(n.type==="villain")fill="#4a0000";else if(n.type==="emperor")fill="#6b5200";const r=n.type==="emperor"?10:n.type==="villain"?8:6;ctx.beginPath();ctx.arc(n.x,n.y,r,0,Math.PI*2);ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle="rgba(201,164,68,.25)";ctx.lineWidth=1;ctx.stroke();ctx.fillStyle=n.type==="villain"?"#c97070":n.type==="emperor"?"#c9a444":"rgba(212,184,150,.85)";ctx.font=`${n.type==="emperor"?"11":"10"}px 'Noto Serif SC',serif`;ctx.textAlign="center";ctx.fillText(n.id,n.x,n.y-r-4);});
+  }
+  let fr=0;function loop(){for(let i=0;i<3;i++)tick();draw();fr++;if(fr<220)requestAnimationFrame(loop);}loop();
+  function nodeAt(clientX,clientY){const rect=canvas.getBoundingClientRect();const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height;const mx=(clientX-rect.left)*scaleX, my=(clientY-rect.top)*scaleY;for(const n of nodes){if(n.type!=="concubine")continue;if((mx-n.x)**2+(my-n.y)**2<=(6+5)**2)return n;}return null;}
+  canvas.addEventListener("mousemove",e=>{const n=nodeAt(e.clientX,e.clientY);if(n){canvas.style.cursor="pointer";const c=concubines.find(c=>c.name===n.id);if(c)showTooltip(e,c.id);}else{canvas.style.cursor="default";hideTooltip();}});
+  canvas.addEventListener("mouseleave",()=>{canvas.style.cursor="default";hideTooltip();});
+  canvas.addEventListener("click",e=>{const n=nodeAt(e.clientX,e.clientY);if(n){const c=concubines.find(c=>c.name===n.id);if(c)openModal(c.id);}});
+}
+
+// ── Modal ─────────────────────────────────────────────────────
+function showTooltip(e, id){
+  const c = concubines.find(c=>c.id===id); if(!c) return;
+  const tip = document.getElementById('bio-tooltip');
+  const imgHtml = c.image
+    ? `<img src="${c.image}" style="width:44px;aspect-ratio:2/3;object-fit:cover;object-position:top;border:1px solid rgba(201,164,68,.2);flex-shrink:0" onerror="this.outerHTML='<div style=width:44px;aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:#0c0906;border:1px solid rgba(201,164,68,.2);color:#7a6128;font-size:1rem>${c.name[0]}</div>'">`
+    : `<div style="width:44px;aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:#0c0906;border:1px solid rgba(201,164,68,.2);color:#7a6128;font-size:1rem;flex-shrink:0">${c.name[0]}</div>`;
+  tip.innerHTML = `<div style="display:flex;gap:.6rem;align-items:flex-start">${imgHtml}<div style="min-width:0"><div style="color:#c9a444;font-size:.82rem;letter-spacing:.1em;margin-bottom:.2rem">${c.name}${c.title?`·${c.title}`:''}</div><div style="color:#7a6848;font-size:.6rem;line-height:1.8">${c.rank}位${c.deathType==="surviving"?"　存世":`　享年${c.age}岁`}</div><div style="color:#7a6848;font-size:.6rem">${DEATH_LABEL[c.deathType]}${c.killer?'　'+c.killer:''}</div>${c.judgment?`<div style="color:#7a6848;font-size:.58rem;margin-top:.35rem;padding-top:.35rem;border-top:1px solid rgba(201,164,68,.12);line-height:1.85;white-space:pre-line">${c.judgment.split('\n').slice(0,2).join('\n')}</div>`:''}</div></div>`;
+  tip.style.display = 'block';
+  const r = tip.getBoundingClientRect();
+  const x = e.clientX + 14;
+  const y = e.clientY - 10;
+  tip.style.left = (x + r.width > window.innerWidth ? x - r.width - 28 : x) + 'px';
+  tip.style.top  = (y + r.height > window.innerHeight ? y - r.height : y) + 'px';
+}
+function hideTooltip(){document.getElementById('bio-tooltip').style.display='none';}
+function renderBio(text){
+  if(!text) return "（小传待录）";
+  return text.replace(/\[\[([^\]]+)\]\]/g, (_,name)=>{const target = concubines.find(c=>c.name===name);if(target) return `<span class="bio-link" onclick="openModal('${target.id}')" onmouseenter="showTooltip(event,'${target.id}')" onmouseleave="hideTooltip()">${name}</span>`;return name;});
+}
+function openModal(id){
+  const c=concubines.find(c=>c.id===id); if(!c)return;
+  const imgWrap=document.getElementById("m-img-wrap");
+  if(c.image){imgWrap.innerHTML=`<img class="modal-img" src="${c.image}" alt="${c.name}" onerror="this.outerHTML='<div class=modal-ph>${c.name[0]}</div>'">`;}else{imgWrap.innerHTML=`<div class="modal-ph">${c.name[0]}</div>`;}
+  document.getElementById("m-name").innerHTML=c.name+(c.title?`<span style="font-size:.65em;margin-left:.3em;color:var(--gold-dim)">·${c.title}</span>`:"");
+  document.getElementById("m-meta").textContent=c.deathType==="surviving"?`逸康${c.entryYear}年入宫　${c.rank}位　存世`:`逸康${c.entryYear}年入宫　逸康${c.deathYear}年殁　享年${c.age}岁　${c.rank}位　${DEATH_LABEL[c.deathType]}${c.killer?"（"+c.killer+"）":""}`;
+  document.getElementById("m-grid").innerHTML=[["宠爱",c.favor],["好感",c.affection],["命格",c.fate.length?c.fate.join("·"):"无"],["子嗣",`${c.sons}子${c.survivingSons}存 ${c.daughters}女${c.survivingDaughters}存`],["出身",c.origin],["擅长",c.specialty||"—"]].map(([l,v])=>`<div class="m-stat"><span class="m-stat-l">${l}</span><div class="m-stat-v">${v}</div></div>`).join("");
+  document.getElementById("m-bio").innerHTML=renderBio(c.bio);
+  document.getElementById("m-jd").textContent=c.judgment||"（判词待录）";
+  document.getElementById("modal").classList.add("active");
+  document.body.style.overflow="hidden";
+}
+function closeModal(){document.getElementById("modal").classList.remove("active");document.body.style.overflow="";}
+function modalBgClick(e){if(e.target===document.getElementById("modal"))closeModal();}
+
+// ── 视图切换 ─────────────────────────────────────────────────
+function switchView(name,btn){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById("view-"+name).classList.add("active");
+  btn.classList.add("active");
+  if(name==="timeline")renderTimeline();
+  if(name==="network")renderNetwork();
+}
+
+// ── 初始化 ────────────────────────────────────────────────────
+renderFilterBar();
+renderCards();
+</script>
+<div id="bio-tooltip"></div>
+</body>
+</html>
